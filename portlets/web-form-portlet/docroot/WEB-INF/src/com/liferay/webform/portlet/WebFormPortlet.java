@@ -60,6 +60,7 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import javax.xml.validation.Validator;
 
 /**
  * @author Daniel Weisser
@@ -398,14 +399,16 @@ public class WebFormPortlet extends MVCPortlet {
 			InternetAddress fromAddress = null;
 
 			try {
-				String fromNamePref = WebFormUtil.getEmailFromName(preferences);
-				String fromAddressPref = WebFormUtil.getEmailFromAddress(
+				String emailFromName = WebFormUtil.getEmailFromName(
+					preferences);
+				String emailFromAddress = WebFormUtil.getEmailFromAddress(
 					preferences);
 				
-				fromAddress = new InternetAddress(
-					fromAddressPref, fromNamePref);
-				
-				if(fromAddress == null){
+				if (Validator.isNotNull(emailFromAddress)) {
+					fromAddress = new InternetAddress(
+						emailFromAddress, emailFromName);
+				}
+				else {
 					String smtpUser = PropsUtil.get(
 						PropsKeys.MAIL_SESSION_MAIL_SMTP_USER);
 

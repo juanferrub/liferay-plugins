@@ -121,7 +121,7 @@ public class WebFormUtil {
 	@AutoEscape
 	public static String getEmailFromName(PortletPreferences preferences) {
 		String emailFromName = GetterUtil.getString(PortletProps.get(
-		"webform.email.from.name"));
+			"webform.email.from.name"));
 
 		return preferences.getValue("emailFromName", emailFromName);
 	}
