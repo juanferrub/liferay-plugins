@@ -42,6 +42,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.util.ArrayList;
@@ -981,8 +982,9 @@ public class IMAPAccessor {
 						String.valueOf(i)),
 					curPart, mailFiles);
 			}
-		}
-		else if (Validator.isNull(fileName)) {
+		} else if (content instanceof InputStream) {
+			return;
+		} else if (Validator.isNull(fileName)) {
 			String contentType = part.getContentType().toLowerCase();
 
 			if (contentType.startsWith(ContentTypes.TEXT_PLAIN)) {
