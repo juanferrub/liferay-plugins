@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -121,22 +122,38 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 						actionRequest, "invalidValidationDefinition" + i);
 				}
 
-				for (Locale locale : fieldLabelMap.keySet()) {
+				Map<Locale, String> oldFieldLabelMap = 
+					LocalizationUtil.getLocalizationMap(
+						preferences, "fieldLabel" + formFieldsIndex);
+				
+				List<Locale> labelMapModifiedLocales = 
+					LocalizationUtil.getModifiedLocales(
+							oldFieldLabelMap, fieldLabelMap);
+				
+				for (Locale locale : labelMapModifiedLocales) {
 					String languageId = LocaleUtil.toLanguageId(locale);
 					String fieldLabelValue = fieldLabelMap.get(locale);
+		
+					LocalizationUtil.setPreferencesValue(
+						preferences, "fieldLabel" + i, languageId,
+							fieldLabelValue);
+				}
+				
+				Map<Locale, String> oldFieldOptionsMap =
+					LocalizationUtil.getLocalizationMap(
+							preferences, "fieldOptions" + formFieldsIndex);
+				
+				List<Locale> optionsMapModifiedLocales = 
+					LocalizationUtil.getModifiedLocales(
+							oldFieldOptionsMap, fieldOptionsMap);
+				
+				for (Locale locale : optionsMapModifiedLocales) {
+					String languageId = LocaleUtil.toLanguageId(locale);
 					String fieldOptionsValue = fieldOptionsMap.get(locale);
 
-					if (Validator.isNotNull(fieldLabelValue)) {
-						LocalizationUtil.setPreferencesValue(
-							preferences, "fieldLabel" + i, languageId,
-							fieldLabelValue);
-					}
-
-					if (Validator.isNotNull(fieldOptionsValue)) {
-						LocalizationUtil.setPreferencesValue(
-							preferences, "fieldOptions" + i, languageId,
+					LocalizationUtil.setPreferencesValue(
+						preferences, "fieldOptions" + i, languageId,
 							fieldOptionsValue);
-					}
 				}
 
 				preferences.setValue("fieldType" + i, fieldType);
