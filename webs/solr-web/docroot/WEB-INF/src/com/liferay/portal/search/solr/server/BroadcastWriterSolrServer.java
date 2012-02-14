@@ -60,7 +60,7 @@ public class BroadcastWriterSolrServer extends SolrServer {
 			}
 		}
 
-		if (response == null) {
+		if (solrServerWrappers.size() > 1 && response == null) {
 			throw new SolrServerException("No server available");
 		}
 

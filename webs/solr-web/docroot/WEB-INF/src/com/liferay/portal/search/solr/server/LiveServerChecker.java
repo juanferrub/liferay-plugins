@@ -83,6 +83,10 @@ public class LiveServerChecker implements Runnable {
 		List<SolrServerWrapper> liveSolrServerWrappers =
 			_solrServerFactory.getLiveServers();
 
+		for (SolrServerWrapper solrServerWrapper : liveSolrServerWrappers) {
+			_solrServerFactory.killServer(solrServerWrapper);
+		}
+
 		liveSolrServerWrappers.clear();
 
 		_scheduledExecutorService.shutdownNow();
