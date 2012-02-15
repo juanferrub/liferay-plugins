@@ -96,7 +96,15 @@ public class BasicAuthSolrServer extends SolrServer {
 	public NamedList<Object> request(SolrRequest solrRequest)
 		throws IOException, SolrServerException {
 
-		return _server.request(solrRequest);
+		try {
+			return _server.request(solrRequest);
+		} catch(IllegalStateException e) {
+			return null;
+		} catch(SolrServerException e) {
+			return null;
+		} catch(NullPointerException e) {
+			return null;
+		}
 	}
 
 	public NamedList<Object> request(
