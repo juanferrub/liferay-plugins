@@ -283,18 +283,18 @@ public class EntryLocalServiceWrapper implements EntryLocalService,
 		return _entryLocalService.searchCount(userId, keywords);
 	}
 
+	public java.util.List<com.liferay.portal.model.BaseModel<?>> searchUsersAndContacts(
+		long companyId, long userId, java.lang.String keywords, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return _entryLocalService.searchUsersAndContacts(companyId, userId,
+			keywords, start, end);
+	}
+
 	public int searchUsersAndContactsCount(long companyId, long userId,
 		java.lang.String keywords)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _entryLocalService.searchUsersAndContactsCount(companyId,
 			userId, keywords);
-	}
-
-	public java.util.List<com.liferay.portal.model.BaseModel<?>> searchUsersAndContactsCount(
-		long companyId, long userId, java.lang.String keywords, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
-		return _entryLocalService.searchUsersAndContactsCount(companyId,
-			userId, keywords, start, end);
 	}
 
 	public com.liferay.contacts.model.Entry updateEntry(long entryId,

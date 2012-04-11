@@ -290,19 +290,19 @@ public class EntryLocalServiceUtil {
 		return getService().searchCount(userId, keywords);
 	}
 
+	public static java.util.List<com.liferay.portal.model.BaseModel<?>> searchUsersAndContacts(
+		long companyId, long userId, java.lang.String keywords, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .searchUsersAndContacts(companyId, userId, keywords, start,
+			end);
+	}
+
 	public static int searchUsersAndContactsCount(long companyId, long userId,
 		java.lang.String keywords)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .searchUsersAndContactsCount(companyId, userId, keywords);
-	}
-
-	public static java.util.List<com.liferay.portal.model.BaseModel<?>> searchUsersAndContactsCount(
-		long companyId, long userId, java.lang.String keywords, int start,
-		int end) throws com.liferay.portal.kernel.exception.SystemException {
-		return getService()
-				   .searchUsersAndContactsCount(companyId, userId, keywords,
-			start, end);
 	}
 
 	public static com.liferay.contacts.model.Entry updateEntry(long entryId,
