@@ -57,7 +57,7 @@ public class ServicePreAction extends Action {
 			return;
 		}
 
-		if (!themeDisplay.isLifecycleRender()) {
+		if (themeDisplay == null || !themeDisplay.isLifecycleRender()) {
 			return;
 		}
 
