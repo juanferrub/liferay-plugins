@@ -14,6 +14,13 @@
 
 package com.liferay.contacts.service.http;
 
+import com.liferay.contacts.service.EntryServiceUtil;
+
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
+import java.rmi.RemoteException;
+
 /**
  * <p>
  * This class provides a SOAP utility for the
@@ -58,4 +65,16 @@ package com.liferay.contacts.service.http;
  * @generated
  */
 public class EntryServiceSoap {
+	public static void deleteEntry(long entryId) throws RemoteException {
+		try {
+			EntryServiceUtil.deleteEntry(entryId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	private static Log _log = LogFactoryUtil.getLog(EntryServiceSoap.class);
 }

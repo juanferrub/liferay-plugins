@@ -55,6 +55,12 @@ public class EntryServiceWrapper implements EntryService,
 		return _entryService.invokeMethod(name, parameterTypes, arguments);
 	}
 
+	public void deleteEntry(long entryId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_entryService.deleteEntry(entryId);
+	}
+
 	/**
 	 * @deprecated Renamed to {@link #getWrappedService}
 	 */
