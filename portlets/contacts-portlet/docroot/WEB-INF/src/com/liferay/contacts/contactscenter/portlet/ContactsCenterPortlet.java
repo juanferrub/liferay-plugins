@@ -69,6 +69,7 @@ import com.liferay.portal.model.Phone;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.model.Website;
+import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.EmailAddressServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -600,8 +601,23 @@ public class ContactsCenterPortlet extends MVCPortlet {
 
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
 
-		if (entryId > 0) {
-			EntryLocalServiceUtil.deleteEntry(entryId);
+		if (entryId > 0 ) {
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
+
+			PermissionChecker permissionChecker =
+				themeDisplay.getPermissionChecker();
+
+			boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
+				permissionChecker.isOmniadmin());
+
+			long userId = themeDisplay.getUserId();
+
+			Entry entry = EntryLocalServiceUtil.fetchEntry(entryId);
+
+			if ((entry != null) && ((entry.getUserId() == userId) || isAdmin)) {
+				EntryLocalServiceUtil.deleteEntry(entryId);
+			}
 		}
 	}
 
