@@ -18,6 +18,7 @@ import com.liferay.contacts.DuplicateEntryEmailAddressException;
 import com.liferay.contacts.EntryEmailAddressException;
 import com.liferay.contacts.model.Entry;
 import com.liferay.contacts.service.EntryLocalServiceUtil;
+import com.liferay.contacts.service.EntryServiceUtil;
 import com.liferay.contacts.util.ContactsConstants;
 import com.liferay.contacts.util.ContactsUtil;
 import com.liferay.contacts.util.PortletKeys;
@@ -601,7 +602,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
 
 		if (entryId > 0) {
-			EntryLocalServiceUtil.deleteEntry(entryId);
+			EntryServiceUtil.deleteEntry(entryId);
 		}
 	}
 
