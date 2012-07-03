@@ -35,7 +35,7 @@ import com.liferay.portal.security.permission.ActionKeys;
  * @see com.liferay.contacts.service.EntryServiceUtil
  */
 public class EntryServiceImpl extends EntryServiceBaseImpl {
-	/*
+	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never reference this interface directly. Always use {@link com.liferay.contacts.service.EntryServiceUtil} to access the entry remote service.
@@ -49,4 +49,5 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 
 		entryLocalService.deleteEntry(entryId);
 	}
+
 }
