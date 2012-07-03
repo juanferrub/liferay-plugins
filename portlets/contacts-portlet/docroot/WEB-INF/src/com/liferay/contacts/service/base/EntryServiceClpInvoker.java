@@ -30,6 +30,10 @@ public class EntryServiceClpInvoker {
 		_methodName21 = "setBeanIdentifier";
 
 		_methodParameterTypes21 = new String[] { "java.lang.String" };
+
+		_methodName26 = "deleteEntry";
+
+		_methodParameterTypes26 = new String[] { "long" };
 	}
 
 	public Object invokeMethod(String name, String[] parameterTypes,
@@ -44,6 +48,11 @@ public class EntryServiceClpInvoker {
 			EntryServiceUtil.setBeanIdentifier((java.lang.String)arguments[0]);
 		}
 
+		if (_methodName26.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes26, parameterTypes)) {
+			EntryServiceUtil.deleteEntry(((Long)arguments[0]).longValue());
+		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -51,4 +60,6 @@ public class EntryServiceClpInvoker {
 	private String[] _methodParameterTypes20;
 	private String _methodName21;
 	private String[] _methodParameterTypes21;
+	private String _methodName26;
+	private String[] _methodParameterTypes26;
 }

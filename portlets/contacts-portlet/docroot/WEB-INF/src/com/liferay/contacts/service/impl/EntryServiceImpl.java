@@ -15,6 +15,10 @@
 package com.liferay.contacts.service.impl;
 
 import com.liferay.contacts.service.base.EntryServiceBaseImpl;
+import com.liferay.contacts.service.permission.EntryPermission;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.security.permission.ActionKeys;
 
 /**
  * The implementation of the entry remote service.
@@ -36,4 +40,13 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 	 *
 	 * Never reference this interface directly. Always use {@link com.liferay.contacts.service.EntryServiceUtil} to access the entry remote service.
 	 */
+
+	public void deleteEntry(long entryId)
+		throws PortalException, SystemException {
+
+		EntryPermission.check(
+			getPermissionChecker(), entryId, ActionKeys.DELETE);
+
+		entryLocalService.deleteEntry(entryId);
+	}
 }
