@@ -31,9 +31,23 @@ public class EntryServiceClp implements EntryService {
 
 		_methodParameterTypes1 = new String[] { "java.lang.String" };
 
-		_methodName3 = "deleteEntry";
+		_methodName3 = "addEntry";
 
-		_methodParameterTypes3 = new String[] { "long" };
+		_methodParameterTypes3 = new String[] {
+				"long", "java.lang.String", "java.lang.String",
+				"java.lang.String"
+			};
+
+		_methodName4 = "updateEntry";
+
+		_methodParameterTypes4 = new String[] {
+				"long", "java.lang.String", "java.lang.String",
+				"java.lang.String"
+			};
+
+		_methodName5 = "deleteEntry";
+
+		_methodParameterTypes5 = new String[] { "long" };
 	}
 
 	public java.lang.String getBeanIdentifier() {
@@ -83,12 +97,98 @@ public class EntryServiceClp implements EntryService {
 		throw new UnsupportedOperationException();
 	}
 
+	public com.liferay.contacts.model.Entry addEntry(long userId,
+		java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableService.invokeMethod(_methodName3,
+					_methodParameterTypes3,
+					new Object[] {
+						userId,
+						
+					ClpSerializer.translateInput(fullName),
+						
+					ClpSerializer.translateInput(emailAddress),
+						
+					ClpSerializer.translateInput(comments)
+					});
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
+	}
+
+	public com.liferay.contacts.model.Entry updateEntry(long entryId,
+		java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableService.invokeMethod(_methodName4,
+					_methodParameterTypes4,
+					new Object[] {
+						entryId,
+						
+					ClpSerializer.translateInput(fullName),
+						
+					ClpSerializer.translateInput(emailAddress),
+						
+					ClpSerializer.translateInput(comments)
+					});
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
+	}
+
 	public void deleteEntry(long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		try {
-			_invokableService.invokeMethod(_methodName3,
-				_methodParameterTypes3, new Object[] { entryId });
+			_invokableService.invokeMethod(_methodName5,
+				_methodParameterTypes5, new Object[] { entryId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -118,4 +218,8 @@ public class EntryServiceClp implements EntryService {
 	private String[] _methodParameterTypes1;
 	private String _methodName3;
 	private String[] _methodParameterTypes3;
+	private String _methodName4;
+	private String[] _methodParameterTypes4;
+	private String _methodName5;
+	private String[] _methodParameterTypes5;
 }

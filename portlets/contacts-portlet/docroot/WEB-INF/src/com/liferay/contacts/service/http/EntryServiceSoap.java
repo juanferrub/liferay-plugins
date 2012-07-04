@@ -65,6 +65,43 @@ import java.rmi.RemoteException;
  * @generated
  */
 public class EntryServiceSoap {
+	/**
+	* NOTE FOR DEVELOPERS:
+	*
+	* Never reference this interface directly. Always use {@link com.liferay.contacts.service.EntryServiceUtil} to access the entry remote service.
+	*/
+	public static com.liferay.contacts.model.EntrySoap addEntry(long userId,
+		java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments) throws RemoteException {
+		try {
+			com.liferay.contacts.model.Entry returnValue = EntryServiceUtil.addEntry(userId,
+					fullName, emailAddress, comments);
+
+			return com.liferay.contacts.model.EntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.contacts.model.EntrySoap updateEntry(
+		long entryId, java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments) throws RemoteException {
+		try {
+			com.liferay.contacts.model.Entry returnValue = EntryServiceUtil.updateEntry(entryId,
+					fullName, emailAddress, comments);
+
+			return com.liferay.contacts.model.EntrySoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static void deleteEntry(long entryId) throws RemoteException {
 		try {
 			EntryServiceUtil.deleteEntry(entryId);
