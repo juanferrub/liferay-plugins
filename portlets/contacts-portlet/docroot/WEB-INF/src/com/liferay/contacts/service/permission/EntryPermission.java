@@ -15,7 +15,6 @@
 package com.liferay.contacts.service.permission;
 
 import com.liferay.contacts.model.Entry;
-import com.liferay.contacts.service.EntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -27,15 +26,6 @@ import com.liferay.portal.security.permission.PermissionChecker;
  */
 public class EntryPermission {
 	public static void check(
-		PermissionChecker permissionChecker, long userId, String actionId)
-		throws PortalException, SystemException {
-
-		if (!contains(permissionChecker, userId, actionId)) {
-			throw new PrincipalException();
-		}
-	}
-
-	public static void check(
 		PermissionChecker permissionChecker, Entry entry, String actionId)
 		throws PortalException, SystemException {
 
@@ -44,20 +34,13 @@ public class EntryPermission {
 		}
 	}
 
-	public static boolean contains(
+	public static void check(
 		PermissionChecker permissionChecker, long userId, String actionId)
 		throws PortalException, SystemException {
 
-		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
-			permissionChecker.isOmniadmin());
-
-		if (ActionKeys.ADD_ENTRY.equals(actionId) &&
-			((permissionChecker.getUserId() == userId || isAdmin))) {
-
-			return true;
+		if (!contains(permissionChecker, userId, actionId)) {
+			throw new PrincipalException();
 		}
-
-		return false;
 	}
 
 	public static boolean contains(
@@ -69,9 +52,25 @@ public class EntryPermission {
 		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
 			permissionChecker.isOmniadmin());
 
-		if (((ActionKeys.DELETE.equals(actionId)) ||
-			(ActionKeys.UPDATE.equals(actionId))) &&
+		if ((ActionKeys.DELETE.equals(actionId) ||
+			ActionKeys.UPDATE.equals(actionId)) &&
 			((entry.getUserId() == userId) || isAdmin)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public static boolean contains(
+		PermissionChecker permissionChecker, long userId, String actionId)
+		throws PortalException, SystemException {
+
+		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
+			permissionChecker.isOmniadmin());
+
+		if (ActionKeys.ADD_ENTRY.equals(actionId) &&
+			((permissionChecker.getUserId() == userId) || isAdmin)) {
 
 			return true;
 		}
