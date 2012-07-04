@@ -416,7 +416,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 				message = "you-have-successfully-updated-the-contact";
 			}
 			else {
-				entry = EntryServiceUtil.addEntry(
+				entry = EntryLocalServiceUtil.addEntry(
 					themeDisplay.getUserId(), fullName, emailAddress, comments);
 
 				message = "you-have-successfully-added-a-new-contact";

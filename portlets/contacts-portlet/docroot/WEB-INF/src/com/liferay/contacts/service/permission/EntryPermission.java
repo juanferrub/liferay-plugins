@@ -27,41 +27,16 @@ import com.liferay.portal.security.permission.PermissionChecker;
  */
 public class EntryPermission {
 	public static void check(
-		PermissionChecker permissionChecker, long userId, String actionId)
+		PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
 
-		if (!contains(permissionChecker, userId, actionId)) {
-			throw new PrincipalException();
-		}
-	}
-
-	public static void check(
-		PermissionChecker permissionChecker, Entry entry, String actionId)
-		throws PortalException, SystemException {
-
-		if (!contains(permissionChecker, entry, actionId)) {
+		if (!contains(permissionChecker, entryId, actionId)) {
 			throw new PrincipalException();
 		}
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, long userId, String actionId)
-		throws PortalException, SystemException {
-
-		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
-			permissionChecker.isOmniadmin());
-
-		if (ActionKeys.ADD_ENTRY.equals(actionId) &&
-			((permissionChecker.getUserId() == userId || isAdmin))) {
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public static boolean contains(
-		PermissionChecker permissionChecker, Entry entry, String actionId)
+		PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
 
 		long userId = permissionChecker.getUserId();
@@ -69,8 +44,10 @@ public class EntryPermission {
 		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
 			permissionChecker.isOmniadmin());
 
-		if (((ActionKeys.DELETE.equals(actionId)) ||
-			(ActionKeys.UPDATE.equals(actionId))) &&
+		Entry entry = EntryLocalServiceUtil.getEntry(entryId);
+
+		if ((ActionKeys.DELETE.equals(actionId) ||
+			ActionKeys.UPDATE.equals(actionId)) &&
 			((entry.getUserId() == userId) || isAdmin)) {
 
 			return true;

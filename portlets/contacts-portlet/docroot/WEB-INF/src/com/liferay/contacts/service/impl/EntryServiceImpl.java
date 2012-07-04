@@ -46,35 +46,28 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 			long userId, String fullName, String emailAddress, String comments)
 		throws PortalException, SystemException {
 
-		EntryPermission.check(
-			getPermissionChecker(), userId, ActionKeys.ADD_ENTRY);
-
 		return entryLocalService.addEntry(
 			userId, fullName, emailAddress, comments);
+	}
+
+	public void deleteEntry(long entryId)
+		throws PortalException, SystemException {
+
+		EntryPermission.check(
+			getPermissionChecker(), entryId, ActionKeys.DELETE);
+
+		entryLocalService.deleteEntry(entryId);
 	}
 
 	public Entry updateEntry(
 			long entryId, String fullName, String emailAddress, String comments)
 		throws PortalException, SystemException {
 
-		Entry entry = entryLocalService.getEntry(entryId);
-
 		EntryPermission.check(
-			getPermissionChecker(), entry, ActionKeys.UPDATE);
+			getPermissionChecker(), entryId, ActionKeys.UPDATE);
 
 		return entryLocalService.updateEntry(
 			entryId, fullName, emailAddress, comments);
-	}
-
-	public void deleteEntry(long entryId)
-		throws PortalException, SystemException {
-
-		Entry entry = entryLocalService.getEntry(entryId);
-
-		EntryPermission.check(
-			getPermissionChecker(), entry, ActionKeys.DELETE);
-
-		entryLocalService.deleteEntry(entryId);
 	}
 
 }
