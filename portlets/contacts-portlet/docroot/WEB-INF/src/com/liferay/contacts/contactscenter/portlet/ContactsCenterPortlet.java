@@ -18,6 +18,7 @@ import com.liferay.contacts.DuplicateEntryEmailAddressException;
 import com.liferay.contacts.EntryEmailAddressException;
 import com.liferay.contacts.model.Entry;
 import com.liferay.contacts.service.EntryLocalServiceUtil;
+import com.liferay.contacts.service.EntryServiceUtil;
 import com.liferay.contacts.util.ContactsConstants;
 import com.liferay.contacts.util.ContactsUtil;
 import com.liferay.contacts.util.PortletKeys;
@@ -409,13 +410,13 @@ public class ContactsCenterPortlet extends MVCPortlet {
 			Entry entry = null;
 
 			if (entryId > 0) {
-				entry = EntryLocalServiceUtil.updateEntry(
+				entry = EntryServiceUtil.updateEntry(
 					entryId, fullName, emailAddress, comments);
 
 				message = "you-have-successfully-updated-the-contact";
 			}
 			else {
-				entry = EntryLocalServiceUtil.addEntry(
+				entry = EntryServiceUtil.addEntry(
 					themeDisplay.getUserId(), fullName, emailAddress, comments);
 
 				message = "you-have-successfully-added-a-new-contact";
@@ -601,7 +602,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
 
 		if (entryId > 0) {
-			EntryLocalServiceUtil.deleteEntry(entryId);
+			EntryServiceUtil.deleteEntry(entryId);
 		}
 	}
 
