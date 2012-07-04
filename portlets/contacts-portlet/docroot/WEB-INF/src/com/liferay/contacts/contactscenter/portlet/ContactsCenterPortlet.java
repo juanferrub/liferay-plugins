@@ -410,13 +410,13 @@ public class ContactsCenterPortlet extends MVCPortlet {
 			Entry entry = null;
 
 			if (entryId > 0) {
-				entry = EntryLocalServiceUtil.updateEntry(
+				entry = EntryServiceUtil.updateEntry(
 					entryId, fullName, emailAddress, comments);
 
 				message = "you-have-successfully-updated-the-contact";
 			}
 			else {
-				entry = EntryLocalServiceUtil.addEntry(
+				entry = EntryServiceUtil.addEntry(
 					themeDisplay.getUserId(), fullName, emailAddress, comments);
 
 				message = "you-have-successfully-added-a-new-contact";
