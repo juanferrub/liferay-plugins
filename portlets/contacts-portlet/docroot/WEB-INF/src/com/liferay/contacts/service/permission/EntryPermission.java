@@ -27,26 +27,50 @@ import com.liferay.portal.security.permission.PermissionChecker;
  */
 public class EntryPermission {
 	public static void check(
-		PermissionChecker permissionChecker, long entryId, String actionId)
+		PermissionChecker permissionChecker, long userId, String actionId)
 		throws PortalException, SystemException {
 
-		if (!contains(permissionChecker, entryId, actionId)) {
+		if (!contains(permissionChecker, userId, actionId)) {
+			throw new PrincipalException();
+		}
+	}
+
+	public static void check(
+		PermissionChecker permissionChecker, Entry entry, String actionId)
+		throws PortalException, SystemException {
+
+		if (!contains(permissionChecker, entry, actionId)) {
 			throw new PrincipalException();
 		}
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, long entryId, String actionId)
+		PermissionChecker permissionChecker, long userId, String actionId)
 		throws PortalException, SystemException {
-
-		long userId = permissionChecker.getUserId();
-
-		Entry entry = EntryLocalServiceUtil.getEntry(entryId);
 
 		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
 			permissionChecker.isOmniadmin());
 
-		if (ActionKeys.DELETE.equals(actionId) &&
+		if (ActionKeys.ADD_ENTRY.equals(actionId) &&
+			((permissionChecker.getUserId() == userId || isAdmin))) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public static boolean contains(
+		PermissionChecker permissionChecker, Entry entry, String actionId)
+		throws PortalException, SystemException {
+
+		long userId = permissionChecker.getUserId();
+
+		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
+			permissionChecker.isOmniadmin());
+
+		if (((ActionKeys.DELETE.equals(actionId)) ||
+			(ActionKeys.UPDATE.equals(actionId))) &&
 			((entry.getUserId() == userId) || isAdmin)) {
 
 			return true;
