@@ -18,6 +18,7 @@ import com.liferay.contacts.DuplicateEntryEmailAddressException;
 import com.liferay.contacts.EntryEmailAddressException;
 import com.liferay.contacts.model.Entry;
 import com.liferay.contacts.service.EntryLocalServiceUtil;
+import com.liferay.contacts.service.EntryServiceUtil;
 import com.liferay.contacts.util.ContactsConstants;
 import com.liferay.contacts.util.ContactsUtil;
 import com.liferay.contacts.util.PortletKeys;
@@ -71,6 +72,7 @@ import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.model.Website;
 import com.liferay.portal.service.EmailAddressServiceUtil;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.UserServiceUtil;
 import com.liferay.portal.theme.PortletDisplay;
@@ -408,15 +410,19 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		try {
 			Entry entry = null;
 
+			ServiceContext serviceContext = ServiceContextFactory.getInstance(
+				actionRequest);
+
 			if (entryId > 0) {
-				entry = EntryLocalServiceUtil.updateEntry(
-					entryId, fullName, emailAddress, comments);
+				entry = EntryServiceUtil.updateEntry(
+					entryId, fullName, emailAddress, comments, serviceContext);
 
 				message = "you-have-successfully-updated-the-contact";
 			}
 			else {
-				entry = EntryLocalServiceUtil.addEntry(
-					themeDisplay.getUserId(), fullName, emailAddress, comments);
+				entry = EntryServiceUtil.addEntry(
+					themeDisplay.getUserId(), fullName, emailAddress, comments,
+					serviceContext);
 
 				message = "you-have-successfully-added-a-new-contact";
 			}
@@ -601,7 +607,7 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		long entryId = ParamUtil.getLong(actionRequest, "entryId");
 
 		if (entryId > 0) {
-			EntryLocalServiceUtil.deleteEntry(entryId);
+			EntryServiceUtil.deleteEntry(entryId);
 		}
 	}
 
