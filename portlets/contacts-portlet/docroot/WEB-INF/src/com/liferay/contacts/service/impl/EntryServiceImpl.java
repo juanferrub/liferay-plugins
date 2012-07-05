@@ -45,7 +45,8 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 	 */
 
 	public Entry addEntry(
-			long userId, String fullName, String emailAddress, String comments)
+			long userId, String fullName, String emailAddress, String comments,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		ContactsPermission.check(
@@ -53,7 +54,7 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 			ActionKeys.ADD_ENTRY);
 
 		return entryLocalService.addEntry(
-			userId, fullName, emailAddress, comments);
+			userId, fullName, emailAddress, comments, serviceContext);
 	}
 
 	public void deleteEntry(long entryId)
@@ -66,14 +67,15 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 	}
 
 	public Entry updateEntry(
-			long entryId, String fullName, String emailAddress, String comments)
+			long entryId, String fullName, String emailAddress,
+			String comments, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		ContactsEntryPermission.check(
 			getPermissionChecker(), entryId, ActionKeys.UPDATE);
 
 		return entryLocalService.updateEntry(
-			entryId, fullName, emailAddress, comments);
+			entryId, fullName, emailAddress, comments, serviceContext);
 	}
 
 }
