@@ -15,6 +15,7 @@
 package com.liferay.contacts.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.PermissionChecker;
 
 /**
@@ -25,11 +26,18 @@ public class ContactsPermission {
 			PermissionChecker permissionChecker, long groupId, String actionId)
 		throws PortalException {
 
+		if (!contains(permissionChecker, groupId, actionId)) {
+			throw new PrincipalException();
+		}
 	}
 
 	public static boolean contains(
 		PermissionChecker permissionChecker, long groupId, String actionId) {
 
-		return true;
+		return permissionChecker.hasPermission(
+			groupId, _CLASS_NAME, groupId, actionId);
 	}
+
+	private static final String _CLASS_NAME = "com.liferay.contacts";
+
 }

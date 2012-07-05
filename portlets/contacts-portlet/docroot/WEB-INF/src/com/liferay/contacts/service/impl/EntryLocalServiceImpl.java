@@ -61,6 +61,12 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 
 		entryPersistence.update(entry, true);
 
+		//Resources
+
+		addEntryResources(
+			entry, serviceContext.getGroupPermissions(),
+			serviceContext.getGuestPermissions());
+
 		return entry;
 	}
 
@@ -72,14 +78,6 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 			entry.getCompanyId(), entry.getGroupId(), entry.getUserId(),
 			Entry.class.getName(), entry.getEntryId(), groupPermissions,
 			guestPermissions);
-	}
-
-	public Entry deleteEntry(long entryId)
-		throws PortalException, SystemException {
-
-		Entry entry = entryPersistence.findByPrimaryKey(entryId);
-
-		return  deleteEntry(entry);
 	}
 
 	public Entry deleteEntry(Entry entry)
@@ -96,6 +94,14 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 			ResourceConstants.SCOPE_INDIVIDUAL, entry.getEntryId());
 
 		return entry;
+	}
+
+	public Entry deleteEntry(long entryId)
+		throws PortalException, SystemException {
+
+		Entry entry = entryPersistence.findByPrimaryKey(entryId);
+
+		return deleteEntry(entry);
 	}
 
 	public List<Entry> getEntries(long userId, int start, int end)
@@ -136,8 +142,8 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 	}
 
 	public Entry updateEntry(
-			long entryId, String fullName, String emailAddress,
-			String comments, ServiceContext serviceContext)
+			long entryId, String fullName, String emailAddress, String comments,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		Entry entry = entryPersistence.findByPrimaryKey(entryId);
@@ -151,6 +157,16 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 
 		entryPersistence.update(entry, true);
 
+		// Resources
+
+		if ((serviceContext.getGroupPermissions() != null) ||
+			(serviceContext.getGuestPermissions() != null)) {
+
+			updateEntryResources(
+				entry, serviceContext.getGroupPermissions(),
+				serviceContext.getGuestPermissions());
+		}
+
 		return entry;
 	}
 
@@ -159,9 +175,8 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		resourceLocalService.updateResources(
-			entry.getCompanyId(), entry.getGroupId(),
-			Entry.class.getName(), entry.getEntryId(), groupPermissions,
-			guestPermissions);
+			entry.getCompanyId(), entry.getGroupId(), Entry.class.getName(),
+			entry.getEntryId(), groupPermissions, guestPermissions);
 	}
 
 	protected void validate(

@@ -25,7 +25,7 @@
 		</permissions>
 	</portlet-resource>
     <model-resource>
-        <model-name>com.liferay.portlet.contacts</model-name>
+        <model-name>com.liferay.contacts</model-name>
         <portlet-ref>
             <portlet-name>1</portlet-name>
         </portlet-ref>
@@ -41,7 +41,7 @@
         </permissions>
     </model-resource>
     <model-resource>
-        <model-name>com.liferay.portlet.contacts.model.Entry</model-name>
+        <model-name>com.liferay.contacts.model.Entry</model-name>
         <portlet-ref>
             <portlet-name>1</portlet-name>
         </portlet-ref>

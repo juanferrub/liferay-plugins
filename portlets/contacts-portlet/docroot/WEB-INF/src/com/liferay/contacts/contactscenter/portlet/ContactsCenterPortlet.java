@@ -72,6 +72,7 @@ import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.model.Website;
 import com.liferay.portal.service.EmailAddressServiceUtil;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.UserServiceUtil;
 import com.liferay.portal.theme.PortletDisplay;
@@ -409,15 +410,19 @@ public class ContactsCenterPortlet extends MVCPortlet {
 		try {
 			Entry entry = null;
 
+			ServiceContext serviceContext = ServiceContextFactory.getInstance(
+				actionRequest);
+
 			if (entryId > 0) {
 				entry = EntryServiceUtil.updateEntry(
-					entryId, fullName, emailAddress, comments);
+					entryId, fullName, emailAddress, comments, serviceContext);
 
 				message = "you-have-successfully-updated-the-contact";
 			}
 			else {
-				entry = EntryLocalServiceUtil.addEntry(
-					themeDisplay.getUserId(), fullName, emailAddress, comments);
+				entry = EntryServiceUtil.addEntry(
+					themeDisplay.getUserId(), fullName, emailAddress, comments,
+					serviceContext);
 
 				message = "you-have-successfully-added-a-new-contact";
 			}

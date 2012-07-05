@@ -19,7 +19,6 @@ import com.liferay.contacts.service.EntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 
 /**
@@ -27,7 +26,16 @@ import com.liferay.portal.security.permission.PermissionChecker;
  */
 public class ContactsEntryPermission {
 	public static void check(
-		PermissionChecker permissionChecker, long entryId, String actionId)
+		PermissionChecker permissionChecker, Entry entry, String actionId)
+		throws PortalException, SystemException {
+
+		if (!contains(permissionChecker, entry, actionId)) {
+			throw new PrincipalException();
+		}
+	}
+
+	public static void check(
+			PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
 
 		if (!contains(permissionChecker, entryId, actionId)) {
@@ -36,24 +44,20 @@ public class ContactsEntryPermission {
 	}
 
 	public static boolean contains(
+		PermissionChecker permissionChecker, Entry entry, String actionId) {
+
+		return permissionChecker.hasPermission(
+			entry.getGroupId(), Entry.class.getName(), entry.getEntryId(),
+		actionId);
+	}
+
+	public static boolean contains(
 		PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
 
-		long userId = permissionChecker.getUserId();
-
-		boolean isAdmin = (permissionChecker.isCompanyAdmin() ||
-			permissionChecker.isOmniadmin());
-
 		Entry entry = EntryLocalServiceUtil.getEntry(entryId);
 
-		if ((ActionKeys.DELETE.equals(actionId) ||
-			ActionKeys.UPDATE.equals(actionId)) &&
-			((entry.getUserId() == userId) || isAdmin)) {
-
-			return true;
-		}
-
-		return false;
+		return contains(permissionChecker, entry, actionId);
 	}
 
 }

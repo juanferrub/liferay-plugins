@@ -67,8 +67,8 @@ public class EntryServiceImpl extends EntryServiceBaseImpl {
 	}
 
 	public Entry updateEntry(
-			long entryId, String fullName, String emailAddress,
-			String comments, ServiceContext serviceContext)
+			long entryId, String fullName, String emailAddress, String comments,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		ContactsEntryPermission.check(
