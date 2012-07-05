@@ -35,19 +35,19 @@ public class EntryServiceClp implements EntryService {
 
 		_methodParameterTypes3 = new String[] {
 				"long", "java.lang.String", "java.lang.String",
-				"java.lang.String"
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
 
-		_methodName4 = "updateEntry";
+		_methodName4 = "deleteEntry";
 
-		_methodParameterTypes4 = new String[] {
+		_methodParameterTypes4 = new String[] { "long" };
+
+		_methodName5 = "updateEntry";
+
+		_methodParameterTypes5 = new String[] {
 				"long", "java.lang.String", "java.lang.String",
-				"java.lang.String"
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
-
-		_methodName5 = "deleteEntry";
-
-		_methodParameterTypes5 = new String[] { "long" };
 	}
 
 	public java.lang.String getBeanIdentifier() {
@@ -99,7 +99,8 @@ public class EntryServiceClp implements EntryService {
 
 	public com.liferay.contacts.model.Entry addEntry(long userId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
@@ -114,50 +115,9 @@ public class EntryServiceClp implements EntryService {
 						
 					ClpSerializer.translateInput(emailAddress),
 						
-					ClpSerializer.translateInput(comments)
-					});
-		}
-		catch (Throwable t) {
-			t = ClpSerializer.translateThrowable(t);
-
-			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
-				throw (com.liferay.portal.kernel.exception.PortalException)t;
-			}
-
-			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
-				throw (com.liferay.portal.kernel.exception.SystemException)t;
-			}
-
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException)t;
-			}
-			else {
-				throw new RuntimeException(t.getClass().getName() +
-					" is not a valid exception");
-			}
-		}
-
-		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
-	}
-
-	public com.liferay.contacts.model.Entry updateEntry(long entryId,
-		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		Object returnObj = null;
-
-		try {
-			returnObj = _invokableService.invokeMethod(_methodName4,
-					_methodParameterTypes4,
-					new Object[] {
-						entryId,
+					ClpSerializer.translateInput(comments),
 						
-					ClpSerializer.translateInput(fullName),
-						
-					ClpSerializer.translateInput(emailAddress),
-						
-					ClpSerializer.translateInput(comments)
+					ClpSerializer.translateInput(serviceContext)
 					});
 		}
 		catch (Throwable t) {
@@ -187,8 +147,8 @@ public class EntryServiceClp implements EntryService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		try {
-			_invokableService.invokeMethod(_methodName5,
-				_methodParameterTypes5, new Object[] { entryId });
+			_invokableService.invokeMethod(_methodName4,
+				_methodParameterTypes4, new Object[] { entryId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -209,6 +169,52 @@ public class EntryServiceClp implements EntryService {
 					" is not a valid exception");
 			}
 		}
+	}
+
+	public com.liferay.contacts.model.Entry updateEntry(long entryId,
+		java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableService.invokeMethod(_methodName5,
+					_methodParameterTypes5,
+					new Object[] {
+						entryId,
+						
+					ClpSerializer.translateInput(fullName),
+						
+					ClpSerializer.translateInput(emailAddress),
+						
+					ClpSerializer.translateInput(comments),
+						
+					ClpSerializer.translateInput(serviceContext)
+					});
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
 	}
 
 	private InvokableService _invokableService;

@@ -35,19 +35,19 @@ public class EntryServiceClpInvoker {
 
 		_methodParameterTypes26 = new String[] {
 				"long", "java.lang.String", "java.lang.String",
-				"java.lang.String"
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
 
-		_methodName27 = "updateEntry";
+		_methodName27 = "deleteEntry";
 
-		_methodParameterTypes27 = new String[] {
+		_methodParameterTypes27 = new String[] { "long" };
+
+		_methodName28 = "updateEntry";
+
+		_methodParameterTypes28 = new String[] {
 				"long", "java.lang.String", "java.lang.String",
-				"java.lang.String"
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
-
-		_methodName28 = "deleteEntry";
-
-		_methodParameterTypes28 = new String[] { "long" };
 	}
 
 	public Object invokeMethod(String name, String[] parameterTypes,
@@ -66,19 +66,21 @@ public class EntryServiceClpInvoker {
 				Arrays.deepEquals(_methodParameterTypes26, parameterTypes)) {
 			return EntryServiceUtil.addEntry(((Long)arguments[0]).longValue(),
 				(java.lang.String)arguments[1], (java.lang.String)arguments[2],
-				(java.lang.String)arguments[3]);
+				(java.lang.String)arguments[3],
+				(com.liferay.portal.service.ServiceContext)arguments[4]);
 		}
 
 		if (_methodName27.equals(name) &&
 				Arrays.deepEquals(_methodParameterTypes27, parameterTypes)) {
-			return EntryServiceUtil.updateEntry(((Long)arguments[0]).longValue(),
-				(java.lang.String)arguments[1], (java.lang.String)arguments[2],
-				(java.lang.String)arguments[3]);
+			EntryServiceUtil.deleteEntry(((Long)arguments[0]).longValue());
 		}
 
 		if (_methodName28.equals(name) &&
 				Arrays.deepEquals(_methodParameterTypes28, parameterTypes)) {
-			EntryServiceUtil.deleteEntry(((Long)arguments[0]).longValue());
+			return EntryServiceUtil.updateEntry(((Long)arguments[0]).longValue(),
+				(java.lang.String)arguments[1], (java.lang.String)arguments[2],
+				(java.lang.String)arguments[3],
+				(com.liferay.portal.service.ServiceContext)arguments[4]);
 		}
 
 		throw new UnsupportedOperationException();

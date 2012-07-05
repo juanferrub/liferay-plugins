@@ -72,26 +72,12 @@ public class EntryServiceSoap {
 	*/
 	public static com.liferay.contacts.model.EntrySoap addEntry(long userId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments) throws RemoteException {
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
 		try {
 			com.liferay.contacts.model.Entry returnValue = EntryServiceUtil.addEntry(userId,
-					fullName, emailAddress, comments);
-
-			return com.liferay.contacts.model.EntrySoap.toSoapModel(returnValue);
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-
-			throw new RemoteException(e.getMessage());
-		}
-	}
-
-	public static com.liferay.contacts.model.EntrySoap updateEntry(
-		long entryId, java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments) throws RemoteException {
-		try {
-			com.liferay.contacts.model.Entry returnValue = EntryServiceUtil.updateEntry(entryId,
-					fullName, emailAddress, comments);
+					fullName, emailAddress, comments, serviceContext);
 
 			return com.liferay.contacts.model.EntrySoap.toSoapModel(returnValue);
 		}
@@ -105,6 +91,24 @@ public class EntryServiceSoap {
 	public static void deleteEntry(long entryId) throws RemoteException {
 		try {
 			EntryServiceUtil.deleteEntry(entryId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.contacts.model.EntrySoap updateEntry(
+		long entryId, java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			com.liferay.contacts.model.Entry returnValue = EntryServiceUtil.updateEntry(entryId,
+					fullName, emailAddress, comments, serviceContext);
+
+			return com.liferay.contacts.model.EntrySoap.toSoapModel(returnValue);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

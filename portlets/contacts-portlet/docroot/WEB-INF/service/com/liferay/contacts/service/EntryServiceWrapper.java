@@ -62,25 +62,28 @@ public class EntryServiceWrapper implements EntryService,
 	*/
 	public com.liferay.contacts.model.Entry addEntry(long userId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _entryService.addEntry(userId, fullName, emailAddress, comments);
-	}
-
-	public com.liferay.contacts.model.Entry updateEntry(long entryId,
-		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _entryService.updateEntry(entryId, fullName, emailAddress,
-			comments);
+		return _entryService.addEntry(userId, fullName, emailAddress, comments,
+			serviceContext);
 	}
 
 	public void deleteEntry(long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_entryService.deleteEntry(entryId);
+	}
+
+	public com.liferay.contacts.model.Entry updateEntry(long entryId,
+		java.lang.String fullName, java.lang.String emailAddress,
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _entryService.updateEntry(entryId, fullName, emailAddress,
+			comments, serviceContext);
 	}
 
 	/**
