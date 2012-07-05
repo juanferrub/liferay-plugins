@@ -25,7 +25,7 @@ import com.liferay.portal.security.permission.PermissionChecker;
 /**
  * @author Ivica Cardic
  */
-public class EntryPermission {
+public class ContactsEntryPermission {
 	public static void check(
 		PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
