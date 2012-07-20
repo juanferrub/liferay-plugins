@@ -16,33 +16,50 @@ package com.liferay.contacts.service.impl;
 
 import com.liferay.contacts.model.Entry;
 import com.liferay.contacts.service.base.EntryServiceBaseImpl;
+import com.liferay.contacts.service.permission.ContactsEntryPermission;
+import com.liferay.contacts.service.permission.ContactsPermission;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.service.ServiceContext;
 
 /**
  * @author Brian Wing Shun Chan
  */
 public class EntryServiceImpl extends EntryServiceBaseImpl {
 
-	public Entry addEntry(String fullName, String emailAddress, String comments)
+	public Entry addEntry(
+		long userId, String fullName, String emailAddress, String comments,
+		ServiceContext serviceContext)
 		throws PortalException, SystemException {
+
+		ContactsPermission.check(
+			getPermissionChecker(), serviceContext.getScopeGroupId(),
+			ActionKeys.ADD_ENTRY);
 
 		return entryLocalService.addEntry(
-			getUserId(), fullName, emailAddress, comments);
+			userId, fullName, emailAddress, comments, serviceContext);
 	}
 
-	public Entry deleteEntry(long entryId)
+	public void deleteEntry(long entryId)
 		throws PortalException, SystemException {
 
-		return entryLocalService.deleteEntry(entryId);
+		ContactsEntryPermission.check(
+			getPermissionChecker(), entryId, ActionKeys.DELETE);
+
+		entryLocalService.deleteEntry(entryId);
 	}
 
 	public Entry updateEntry(
-			long entryId, String fullName, String emailAddress, String comments)
+		long entryId, String fullName, String emailAddress, String comments,
+		ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
+		ContactsEntryPermission.check(
+			getPermissionChecker(), entryId, ActionKeys.UPDATE);
+
 		return entryLocalService.updateEntry(
-			entryId, fullName, emailAddress, comments);
+			entryId, fullName, emailAddress, comments, serviceContext);
 	}
 
 }
