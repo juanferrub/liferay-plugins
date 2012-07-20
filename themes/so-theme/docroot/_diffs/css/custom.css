@@ -27,6 +27,12 @@ a:hover {
 	text-decoration: underline;
 }
 
+a:focus .opens-new-window-accessible {
+	clip: none;
+	position: fixed;
+	text-indent: 0;
+}
+
 .ie6 img {
 	position: static;
 }
@@ -35,12 +41,6 @@ a:hover {
 	clip: rect(0 0 0 0);
 	position: absolute;
 	text-indent: -9999em;
-}
-
-a:focus .opens-new-window-accessible {
-	clip: none;
-	position: fixed;
-	text-indent: 0;
 }
 
 #banner:after, #content:after, #footer, .contacts-portlet .members-container:after, .portlet-msg-info:after, .portlet-toolbar:after, .so-portlet-activities .activity-item:after, .taglib-header:after, .tasks-portlet:after {
@@ -312,7 +312,7 @@ a:focus .opens-new-window-accessible {
 
 	.profile-name {
 		font-weight: bold;
-		line-height: 1em;
+		line-height: 1.25em;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		width: 128px;
@@ -693,7 +693,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 }
 
 #toggleFluid, .so-layout-fluid-ad #toggleFluid {
-	background-image: url(../images/custom/toggle-button-bg.png);
+	background-image: url(../images/custom/so_toggle_button_bg.png);
 	background-position: 8px 50%;
 	background-repeat: no-repeat;
 	display: block;
@@ -873,7 +873,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 	}
 
 	.result-tags {
-		background: url(../images/custom/tag_small.png) no-repeat 0 3px;
+		background: url(../images/custom/so_tag_small.png) no-repeat 0 3px;
 		color: #777;
 		font-size: 10px;
 		padding-left: 15px;
@@ -898,7 +898,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 /* Dockbar */
 
 .dockbar {
-	background-image: url(../images/custom/dockbar_bg.png);
+	background-image: url(../images/custom/so_dockbar_bg.png);
 	background-color: #EAEAEA;
 	background-position: bottom left;
 	border-bottom-color: #CDCDCD;
@@ -1170,7 +1170,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 		}
 	}
 
-	.results-header {
+	#_28_bookmarksEntriesSearchContainer .results-header {
 		display: none;
 	}
 }
@@ -1182,13 +1182,15 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 	margin: 0px;
 
 	li {
-		background: url(@theme_image_path@/common/breadcrumbs_so.png) no-repeat scroll 100% 50% transparent;
+		background: url(../images/custom/so_breadcrumbs.png) no-repeat scroll 100% 50% transparent;
 		max-width: 50%;
 
 		a {
+			border-bottom: 1px solid $gray;
 			color: #34404F;
 			display: inline-block;
 			font-weight: bold;
+			margin-bottom: -1px;
 			padding: 7px 20px 7px 5px;
 
 			&:hover {
@@ -1249,10 +1251,12 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 
 	.date-selector, .event-selector {
 		float: left;
+		margin: 4px 10px;
 	}
 
 	.day-grid {
 		border-top: 1px solid #CCC;
+		clear: both;
 
 		.hour, .half-hour {
 			border-bottom: 1px dotted #EEE;
@@ -1270,6 +1274,17 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 			background: #EEE;
 			border: 1px solid #CCC;
 		}
+	}
+
+	p {
+		word-wrap: break-word;
+	}
+}
+
+.portlet-column-content-only {
+	.portlet-calendar .aui-column-content {
+		max-width: 550px;
+		padding: 10px;
 	}
 }
 
@@ -1432,13 +1447,6 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 		background-image: none;
 	}
 
-	.breadcrumbs-horizontal li {
-		background: url(@theme_image_path@/arrows/05_right.png) no-repeat scroll 100% 50% transparent;
-		margin-right: 5px;
-		max-width: 50%;
-		padding-right: 15px;
-	}
-
 	.breadcrumbs-horizontal .last {
 		margin-top: 0.2em;
 	}
@@ -1506,28 +1514,8 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 		min-width: 200px;
 	}
 
-	.version-history .results-grid {
-		overflow: visible;
-
-		table {
-			background: #FFF;
-			position: relative;
-			width: 100%;
-			z-index: 1;
-
-			td, th {
-				overflow: hidden;
-				padding: 5px 5px;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
-
-			&:hover td, th {
-				overflow: visible;
-				text-overflow: visible;
-				white-space: normal;
-			}
-		}
+	.version-history .results-grid .lfr-actions .lfr-trigger strong {
+		min-width: 16px;
 	}
 
 	.document-display-style.display-icon {
@@ -1679,7 +1667,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 			text-align: left;
 			text-decoration: none;
 			top: 0.5em;
-			width: 500px;
+			white-space: nowrap;
 			z-index: 1;
 		}
 
@@ -1728,8 +1716,8 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 		padding: 0;
 	}
 
-	.threads-panel .lfr-actions.show-arrow.direction-left {
-		.lfr-trigger {
+	.message-boards-panels, .results-grid {
+		.lfr-actions.show-arrow.direction-left .lfr-trigger {
 			padding: 0;
 
 			strong {
@@ -1754,7 +1742,6 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 			}
 		}
 	}
-
 
 	.thread-body {
 		padding: 10px 0;
@@ -1786,6 +1773,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 	.edit-controls {
 		position: relative;
 		top: -.5em;
+		z-index: 2;
 
 		li {
 			margin: 0;
@@ -1909,8 +1897,12 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 		margin: 0;
 	}
 
-	.thread .results-row, .results-grid table.taglib-search-iterator, .results-grid .results-row td, .results-grid .results-row.alt td {
-		border-width: 0 0 1px;
+	.private-messaging-container {
+		.results-grid, .results-grid table.taglib-search-iterator, .results-grid .results-row td, .results-grid .results-row.alt td, .thread .results-row {
+			border-left-width: 0;
+			border-right-width: 0;
+			border-top-width: 0;
+		}
 	}
 
 	.message-link:hover {
@@ -2015,7 +2007,10 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 
 .so-portlet-invite-members {
 	border: 0px solid transparent;
-	padding: 10px;
+}
+
+.so-portlet-invite-members .invite-members {
+	margin: 10px;
 }
 
 .invite-members {
@@ -2239,96 +2234,6 @@ body.so-layout-fluid, body.so-layout-fluid-ad {
 	}
 }
 
-/* ---------- Login Screens ---------- */
-
-#loginPage {
-	.portlet {
-		border-bottom-width: 0;
-	}
-
-	.login-holder, .portlet-login {
-		margin: 15px auto;
-	}
-
-	.login-holder {
-		left: 0;
-		position: absolute;
-		right: 0;
-		top: 17.5%;
-	}
-
-	.company-title {
-		text-align: center;
-	}
-
-	.portlet-login {
-		padding: 4px;
-		position: relative;
-		width: 260px;
-
-		.portlet-topper {
-			display: none;
-		}
-
-		.portlet-content {
-			padding-bottom: 0;
-		}
-
-		.aui-field-input-text {
-			width: 225px;
-		}
-
-		.navigation {
-			border: 1px solid $gray;
-			left: 0;
-			margin-top: 4em;
-			position: absolute;
-			right: 0;
-			top: 100%;
-
-			.taglib-icon-list li {
-				display: block;
-				margin: 0;
-
-				a {
-					display: block;
-					padding: 2px;
-					white-space: pre;
-
-					&:hover {
-						background-color: #FFF;
-						text-decoration: none;
-					}
-				}
-			}
-		}
-	}
-
-	.portlet-login, .portlet-login .navigation, .signed-in-as {
-		background: $gray-light;
-	}
-
-	.signed-in-as {
-		padding: 10px;
-		text-align: center;
-		width: 100px;
-
-		.profile-image img {
-			width: 100px;
-			margin-bottom: .5em;
-		}
-
-		.user-name {
-			color: #34404F;
-			font-weight: bold;
-			padding: 4px 8px;
-
-			&:hover {
-				text-decoration: none;
-			}
-		}
-	}
-}
 
 /* ---------- Extras ---------- */
 
@@ -2352,7 +2257,7 @@ button, input[type=button], input[type=reset], input[type=submit], #toggleFluid,
 	@include box-shadow(0 1px 0 #F4F3F3 inset, 0 -1px 0 #D9D8D8 inset);
 }
 
-#loginPage .portlet-login, .aui-dialog-content, .aui-underlay-content {
+.aui-dialog-content, .aui-underlay-content {
 	@include box-shadow(0 0 9px -3px #000, 0 20px 29px -22px rgba(0, 0, 0, 0.6));
 }
 
@@ -2370,7 +2275,7 @@ input[type=button], input[type=reset], input[type=submit], .aui-state-hover, .co
 	@include box-shadow(0 3px 10px -6px rgba(0, 0, 0, .5));
 }
 
-#loginPage .portlet-login, #loginPage .portlet-login .navigation, .portlet-blogs .lfr-meta-actions, .user-tags li a {
+.portlet-blogs .lfr-meta-actions, .user-tags li a {
 	@include border-radius(4px);
 }
 

@@ -18,12 +18,14 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.User;
+import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.ServiceContextThreadLocal;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.social.model.BaseSocialRequestInterpreter;
 import com.liferay.portlet.social.model.SocialRelationConstants;
 import com.liferay.portlet.social.model.SocialRequest;
 import com.liferay.portlet.social.model.SocialRequestFeedEntry;
-import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
+import com.liferay.portlet.social.service.SocialRelationServiceUtil;
 
 /**
  * @author Ryan Park
@@ -40,8 +42,6 @@ public class ContactsCenterRequestInterpreter
 			SocialRequest request, ThemeDisplay themeDisplay)
 		throws Exception {
 
-		String creatorUserName = getUserName(request.getUserId(), themeDisplay);
-
 		int requestType = request.getType();
 
 		// Title
@@ -49,6 +49,9 @@ public class ContactsCenterRequestInterpreter
 		String title = StringPool.BLANK;
 
 		if (requestType == SocialRelationConstants.TYPE_BI_CONNECTION) {
+			String creatorUserName = getUserNameLink(
+				request.getUserId(), themeDisplay);
+
 			title = themeDisplay.translate(
 				"request-social-networking-summary-add-connection",
 				new Object[] {creatorUserName});
@@ -65,10 +68,13 @@ public class ContactsCenterRequestInterpreter
 	protected boolean doProcessConfirmation(
 		SocialRequest request, ThemeDisplay themeDisplay) {
 
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
 		try {
-			SocialRelationLocalServiceUtil.addRelation(
+			SocialRelationServiceUtil.addRelation(
 				request.getUserId(), request.getReceiverUserId(),
-				request.getType());
+				request.getType(), serviceContext);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

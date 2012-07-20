@@ -41,6 +41,8 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Indexer;
@@ -100,6 +102,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		if (!isValidDirName(dirName)) {
+			throw new FileNameException();
+		}
+
+		if (!isValidFileName(shortFileName)) {
 			throw new FileNameException();
 		}
 
@@ -677,11 +683,15 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		KBArticle kbArticle = getLatestKBArticle(
 			resourcePrimKey, WorkflowConstants.STATUS_ANY);
 
+		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
+
+		extraDataJSONObject.put("title", kbArticle.getTitle());
+
 		if (kbArticle.isApproved() || !kbArticle.isFirstVersion()) {
 			socialActivityLocalService.addActivity(
 				userId, kbArticle.getGroupId(), KBArticle.class.getName(),
 				resourcePrimKey, AdminActivityKeys.MOVE_KB_ARTICLE,
-				StringPool.BLANK, 0);
+				extraDataJSONObject.toString(), 0);
 		}
 	}
 
@@ -1001,17 +1011,21 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		// Social
 
+		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
+
+		extraDataJSONObject.put("title", kbArticle.getTitle());
+
 		if (!kbArticle.isFirstVersion()) {
 			socialActivityLocalService.addActivity(
 				userId, kbArticle.getGroupId(), KBArticle.class.getName(),
 				resourcePrimKey, AdminActivityKeys.UPDATE_KB_ARTICLE,
-				StringPool.BLANK, 0);
+				extraDataJSONObject.toString(), 0);
 		}
 		else {
 			socialActivityLocalService.addActivity(
 				userId, kbArticle.getGroupId(), KBArticle.class.getName(),
 				resourcePrimKey, AdminActivityKeys.ADD_KB_ARTICLE,
-				StringPool.BLANK, 0);
+				extraDataJSONObject.toString(), 0);
 		}
 
 		// Indexer
@@ -1370,6 +1384,16 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		ticket.setExpirationDate(getTicketExpirationDate());
 
 		ticket = ticketLocalService.updateTicket(ticket);
+
+		return true;
+	}
+
+	protected boolean isValidFileName(String name) throws SystemException {
+		if ((name == null) || name.contains(StringPool.BACK_SLASH) ||
+			name.contains(StringPool.SLASH)) {
+
+			return false;
+		}
 
 		return true;
 	}
