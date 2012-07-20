@@ -62,27 +62,32 @@ public class EntryServiceUtil {
 		return getService().invokeMethod(name, parameterTypes, arguments);
 	}
 
-	public static com.liferay.contacts.model.Entry addEntry(
+	public static com.liferay.contacts.model.Entry addEntry(long userId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return getService().addEntry(fullName, emailAddress, comments);
+		return getService()
+				   .addEntry(userId, fullName, emailAddress, comments,
+			serviceContext);
 	}
 
-	public static com.liferay.contacts.model.Entry deleteEntry(long entryId)
+	public static void deleteEntry(long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return getService().deleteEntry(entryId);
+		getService().deleteEntry(entryId);
 	}
 
 	public static com.liferay.contacts.model.Entry updateEntry(long entryId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
-				   .updateEntry(entryId, fullName, emailAddress, comments);
+				   .updateEntry(entryId, fullName, emailAddress, comments,
+			serviceContext);
 	}
 
 	public static void clearService() {

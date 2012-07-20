@@ -34,7 +34,8 @@ public class EntryServiceClp implements EntryService {
 		_methodName3 = "addEntry";
 
 		_methodParameterTypes3 = new String[] {
-				"java.lang.String", "java.lang.String", "java.lang.String"
+				"long", "java.lang.String", "java.lang.String",
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
 
 		_methodName4 = "deleteEntry";
@@ -45,7 +46,7 @@ public class EntryServiceClp implements EntryService {
 
 		_methodParameterTypes5 = new String[] {
 				"long", "java.lang.String", "java.lang.String",
-				"java.lang.String"
+				"java.lang.String", "com.liferay.portal.service.ServiceContext"
 			};
 	}
 
@@ -96,9 +97,10 @@ public class EntryServiceClp implements EntryService {
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.contacts.model.Entry addEntry(
+	public com.liferay.contacts.model.Entry addEntry(long userId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
@@ -107,11 +109,15 @@ public class EntryServiceClp implements EntryService {
 			returnObj = _invokableService.invokeMethod(_methodName3,
 					_methodParameterTypes3,
 					new Object[] {
-						ClpSerializer.translateInput(fullName),
+						userId,
+						
+					ClpSerializer.translateInput(fullName),
 						
 					ClpSerializer.translateInput(emailAddress),
 						
-					ClpSerializer.translateInput(comments)
+					ClpSerializer.translateInput(comments),
+						
+					ClpSerializer.translateInput(serviceContext)
 					});
 		}
 		catch (Throwable t) {
@@ -137,14 +143,12 @@ public class EntryServiceClp implements EntryService {
 		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
 	}
 
-	public com.liferay.contacts.model.Entry deleteEntry(long entryId)
+	public void deleteEntry(long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		Object returnObj = null;
-
 		try {
-			returnObj = _invokableService.invokeMethod(_methodName4,
-					_methodParameterTypes4, new Object[] { entryId });
+			_invokableService.invokeMethod(_methodName4,
+				_methodParameterTypes4, new Object[] { entryId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -165,13 +169,12 @@ public class EntryServiceClp implements EntryService {
 					" is not a valid exception");
 			}
 		}
-
-		return (com.liferay.contacts.model.Entry)ClpSerializer.translateOutput(returnObj);
 	}
 
 	public com.liferay.contacts.model.Entry updateEntry(long entryId,
 		java.lang.String fullName, java.lang.String emailAddress,
-		java.lang.String comments)
+		java.lang.String comments,
+		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
@@ -186,7 +189,9 @@ public class EntryServiceClp implements EntryService {
 						
 					ClpSerializer.translateInput(emailAddress),
 						
-					ClpSerializer.translateInput(comments)
+					ClpSerializer.translateInput(comments),
+						
+					ClpSerializer.translateInput(serviceContext)
 					});
 		}
 		catch (Throwable t) {
