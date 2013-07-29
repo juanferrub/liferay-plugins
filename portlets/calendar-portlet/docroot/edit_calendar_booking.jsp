@@ -41,6 +41,10 @@ long endTime = BeanParamUtil.getLong(calendarBooking, request, "endTime", defaul
 
 java.util.Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(endTime, userTimeZone);
 
+if (com.liferay.portal.kernel.util.CalendarUtil.equalsByDay(startTimeJCalendar.getTime(), endTimeJCalendar.getTime())) {
+	activeView = "day";
+}
+
 boolean allDay = BeanParamUtil.getBoolean(calendarBooking, request, "allDay");
 
 long firstReminder = BeanParamUtil.getLong(calendarBooking, request, "firstReminder");
@@ -437,7 +441,7 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 
 					calendarList.activeItem.set('visible', true);
 
-					<portlet:namespace />toggler.toggle();
+					<portlet:namespace />toggler.expand();
 
 					instance.hide();
 
