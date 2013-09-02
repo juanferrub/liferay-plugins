@@ -55,8 +55,7 @@ public class TasksActivityInterpreter extends SOSocialActivityInterpreter {
 			SocialActivity activity =
 				SocialActivityLocalServiceUtil.getActivity(activityId);
 
-			if ((activity.getType() == _ACTIVITY_KEY_ADD_ENTRY) ||
-				(activity.getType() == _ACTIVITY_KEY_REOPEN_ENTRY) ||
+			if ((activity.getType() == _ACTIVITY_KEY_REOPEN_ENTRY) ||
 				(activity.getType() == _ACTIVITY_KEY_RESOLVE_ENTRY)) {
 
 				activitySet =
@@ -71,7 +70,7 @@ public class TasksActivityInterpreter extends SOSocialActivityInterpreter {
 						activity.getClassPK(), activity.getType());
 			}
 
-			if ((activitySet != null) && !isExpired(activitySet)) {
+			if ((activitySet != null) && !isExpired(activitySet, false)) {
 				return activitySet.getActivitySetId();
 			}
 		}
