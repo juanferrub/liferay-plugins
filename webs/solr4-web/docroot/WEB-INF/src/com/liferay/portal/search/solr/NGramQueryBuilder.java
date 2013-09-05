@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
@@ -12,20 +11,18 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/search/init.jsp" %>
+package com.liferay.portal.search.solr;
 
-<div class="navbar-search pull-left knowledge-search">
-	<div class="form-search">
-		<liferay-portlet:renderURL varImpl="searchURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
-			<portlet:param name="mvcPath" value="/search/search.jsp" />
-		</liferay-portlet:renderURL>
+import com.liferay.portal.kernel.search.SearchException;
 
-		<aui:form action="<%= searchURL %>" method="get" name="searchFm">
-			<liferay-portlet:renderURLParams varImpl="searchURL" />
+import org.apache.solr.client.solrj.SolrQuery;
 
-			<liferay-ui:input-search />
-		</aui:form>
-	</div>
-</div>
+/**
+ * @author Michael C. Han
+ */
+public interface NGramQueryBuilder {
+
+	public SolrQuery getNGramQuery(String input) throws SearchException;
+
+}
