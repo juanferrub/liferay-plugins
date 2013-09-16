@@ -402,6 +402,14 @@ public class CalendarBookingLocalServiceImpl
 
 	@Override
 	public List<CalendarBooking> getCalendarBookings(
+			long calendarId, int[] statuses)
+		throws SystemException {
+
+		return calendarBookingPersistence.findByC_S(calendarId, statuses);
+	}
+
+	@Override
+	public List<CalendarBooking> getCalendarBookings(
 			long calendarId, long startTime, long endTime)
 		throws SystemException {
 
@@ -929,14 +937,15 @@ public class CalendarBookingLocalServiceImpl
 				trashEntryLocalService.addTrashEntry(
 					userId, calendarBooking.getGroupId(),
 					CalendarBooking.class.getName(),
-					calendarBooking.getCalendarBookingId(), oldStatus, null,
-					null);
+					calendarBooking.getCalendarBookingId(),
+					calendarBooking.getUuid(), null, oldStatus, null, null);
 			}
 			else {
 				trashEntryLocalService.addTrashEntry(
 					userId, calendarBooking.getGroupId(),
 					CalendarBooking.class.getName(),
 					calendarBooking.getCalendarBookingId(),
+					calendarBooking.getUuid(), null,
 					CalendarBookingWorkflowConstants.STATUS_PENDING, null,
 					null);
 			}
