@@ -158,7 +158,7 @@ portletURL.setParameter("tabs1", tabs1);
 								}
 							}
 						},
-						dataType: 'json',
+						dataType: 'json'
 					}
 				);
 			}
@@ -351,5 +351,16 @@ portletURL.setParameter("tabs1", tabs1);
 			Liferay.SO.Activities.toggleEntry(event, '<portlet:namespace />');
 		},
 		'.toggle-entry'
+	);
+
+	Liferay.on(
+		'sessionExpired',
+		function(event) {
+			var reload = function() {
+				window.location.reload();
+			};
+
+			loadNewContent = reload;
+		}
 	);
 </aui:script>
