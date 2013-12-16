@@ -344,6 +344,10 @@ public class AccountPersistenceImpl extends BasePersistenceImpl<Account>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUserId(userId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Account> list = findByUserId(userId, count - 1, count,
 				orderByComparator);
 
@@ -838,6 +842,10 @@ public class AccountPersistenceImpl extends BasePersistenceImpl<Account>
 	private static final String _FINDER_COLUMN_U_A_ADDRESS_2 = "account.address = ?";
 	private static final String _FINDER_COLUMN_U_A_ADDRESS_3 = "(account.address IS NULL OR account.address = '')";
 
+	public AccountPersistenceImpl() {
+		setModelClass(Account.class);
+	}
+
 	/**
 	 * Caches the account in the entity cache if it is enabled.
 	 *
@@ -1133,6 +1141,8 @@ public class AccountPersistenceImpl extends BasePersistenceImpl<Account>
 
 		clearUniqueFindersCache(account);
 		cacheUniqueFindersCache(account);
+
+		account.resetOriginalValues();
 
 		return account;
 	}

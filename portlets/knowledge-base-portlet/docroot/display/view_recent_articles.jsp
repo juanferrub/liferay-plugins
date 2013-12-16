@@ -33,10 +33,10 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 	orderByCol="<%= orderByCol %>"
 	orderByComparator="<%= KnowledgeBaseUtil.getKBArticleOrderByComparator(orderByCol, orderByType) %>"
 	orderByType="<%= orderByType %>"
+	total="<%= KBArticleServiceUtil.getGroupKBArticlesCount(scopeGroupId, WorkflowConstants.STATUS_APPROVED) %>"
 >
 	<liferay-ui:search-container-results
 		results="<%= KBArticleServiceUtil.getGroupKBArticles(scopeGroupId, WorkflowConstants.STATUS_APPROVED, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-		total="<%= KBArticleServiceUtil.getGroupKBArticlesCount(scopeGroupId, WorkflowConstants.STATUS_APPROVED) %>"
 	/>
 
 	<liferay-ui:search-container-row
@@ -128,9 +128,10 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 				modelResourceDescription="<%= HtmlUtil.escape(themeDisplay.getScopeGroupName()) %>"
 				resourcePrimKey="<%= String.valueOf(scopeGroupId) %>"
 				var="permissionsURL"
+				windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 			/>
 
-			<aui:button href="<%= permissionsURL %>" value="permissions" />
+			<aui:button href="<%= permissionsURL %>" useDialog="<%= true %>" value="permissions" />
 		</c:if>
 
 		<liferay-util:include page="/display/display_tools.jsp" servletContext="<%= application %>" />

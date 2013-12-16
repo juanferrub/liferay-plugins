@@ -864,16 +864,6 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	}
 
 	/**
-	* Returns <code>true</code> if this k b article is in the Recycle Bin.
-	*
-	* @return <code>true</code> if this k b article is in the Recycle Bin; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInTrash() {
-		return _kbArticle.isInTrash();
-	}
-
-	/**
 	* Returns <code>true</code> if this k b article is pending.
 	*
 	* @return <code>true</code> if this k b article is pending; <code>false</code> otherwise
@@ -1072,6 +1062,16 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public KBArticle getWrappedModel() {
 		return _kbArticle;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _kbArticle.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _kbArticle.isFinderCacheEnabled();
 	}
 
 	@Override

@@ -345,6 +345,10 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByAccountId(accountId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<Folder> list = findByAccountId(accountId, count - 1, count,
 				orderByComparator);
 
@@ -839,6 +843,10 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 	private static final String _FINDER_COLUMN_A_F_FULLNAME_2 = "folder.fullName = ?";
 	private static final String _FINDER_COLUMN_A_F_FULLNAME_3 = "(folder.fullName IS NULL OR folder.fullName = '')";
 
+	public FolderPersistenceImpl() {
+		setModelClass(Folder.class);
+	}
+
 	/**
 	 * Caches the folder in the entity cache if it is enabled.
 	 *
@@ -1135,6 +1143,8 @@ public class FolderPersistenceImpl extends BasePersistenceImpl<Folder>
 
 		clearUniqueFindersCache(folder);
 		cacheUniqueFindersCache(folder);
+
+		folder.resetOriginalValues();
 
 		return folder;
 	}

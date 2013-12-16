@@ -56,7 +56,7 @@ MicroblogsEntry microblogsEntry = MicroblogsEntryLocalServiceUtil.fetchMicroblog
 						</div>
 
 						<div class="activity-user-name">
-							<%= receiverUser.getFullName() %>
+							<%= HtmlUtil.escape(receiverUser.getFullName()) %>
 						</div>
 					</div>
 
@@ -77,7 +77,7 @@ MicroblogsEntry microblogsEntry = MicroblogsEntryLocalServiceUtil.fetchMicroblog
 
 <aui:script>
 	function <portlet:namespace />closeEntry() {
-		Liferay.Util.getWindow('<portlet:namespace />Dialog').close();
+		Liferay.Util.getWindow('<portlet:namespace />Dialog').destroy();
 	}
 
 	function <portlet:namespace />saveEntry() {

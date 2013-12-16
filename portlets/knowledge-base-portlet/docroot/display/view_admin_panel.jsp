@@ -52,9 +52,10 @@ String orderByType2 = ParamUtil.getString(request, "orderByType2", "desc");
 				modelResourceDescription="<%= HtmlUtil.escape(themeDisplay.getScopeGroupName()) %>"
 				resourcePrimKey="<%= String.valueOf(scopeGroupId) %>"
 				var="permissionsURL"
+				windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 			/>
 
-			<aui:button href="<%= permissionsURL %>" value="permissions" />
+			<aui:button href="<%= permissionsURL %>" useDialog="<%= true %>" value="permissions" />
 		</c:if>
 	</aui:button-row>
 </c:if>
@@ -75,10 +76,10 @@ String orderByType2 = ParamUtil.getString(request, "orderByType2", "desc");
 			orderByComparator="<%= KnowledgeBaseUtil.getKBArticleOrderByComparator(orderByCol1, orderByType1) %>"
 			orderByType="<%= orderByType1 %>"
 			orderByTypeParam="orderByType1"
+			total="<%= KBArticleServiceUtil.getGroupKBArticlesCount(scopeGroupId, WorkflowConstants.STATUS_ANY) %>"
 		>
 			<liferay-ui:search-container-results
 				results="<%= KBArticleServiceUtil.getGroupKBArticles(scopeGroupId, WorkflowConstants.STATUS_ANY, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-				total="<%= KBArticleServiceUtil.getGroupKBArticlesCount(scopeGroupId, WorkflowConstants.STATUS_ANY) %>"
 			/>
 
 			<liferay-ui:search-container-row
@@ -161,10 +162,10 @@ String orderByType2 = ParamUtil.getString(request, "orderByType2", "desc");
 				orderByComparator="<%= KnowledgeBaseUtil.getKBTemplateOrderByComparator(orderByCol2, orderByType2) %>"
 				orderByType="<%= orderByType2 %>"
 				orderByTypeParam="orderByType2"
+				total="<%= KBTemplateServiceUtil.getGroupKBTemplatesCount(scopeGroupId) %>"
 			>
 				<liferay-ui:search-container-results
 					results="<%= KBTemplateServiceUtil.getGroupKBTemplates(scopeGroupId, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-					total="<%= KBTemplateServiceUtil.getGroupKBTemplatesCount(scopeGroupId) %>"
 				/>
 
 				<liferay-ui:search-container-row

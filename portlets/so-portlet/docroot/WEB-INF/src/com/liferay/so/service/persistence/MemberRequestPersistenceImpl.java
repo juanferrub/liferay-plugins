@@ -606,6 +606,10 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByReceiverUserId(receiverUserId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<MemberRequest> list = findByReceiverUserId(receiverUserId,
 				count - 1, count, orderByComparator);
 
@@ -1122,6 +1126,10 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByR_S(receiverUserId, status);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<MemberRequest> list = findByR_S(receiverUserId, status, count - 1,
 				count, orderByComparator);
 
@@ -1628,6 +1636,10 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	private static final String _FINDER_COLUMN_G_R_S_RECEIVERUSERID_2 = "memberRequest.receiverUserId = ? AND ";
 	private static final String _FINDER_COLUMN_G_R_S_STATUS_2 = "memberRequest.status = ?";
 
+	public MemberRequestPersistenceImpl() {
+		setModelClass(MemberRequest.class);
+	}
+
 	/**
 	 * Caches the member request in the entity cache if it is enabled.
 	 *
@@ -1995,6 +2007,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 
 		clearUniqueFindersCache(memberRequest);
 		cacheUniqueFindersCache(memberRequest);
+
+		memberRequest.resetOriginalValues();
 
 		return memberRequest;
 	}
