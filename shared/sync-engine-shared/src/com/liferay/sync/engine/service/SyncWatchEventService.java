@@ -19,6 +19,9 @@ import com.liferay.sync.engine.service.persistence.SyncWatchEventPersistence;
 
 import java.sql.SQLException;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +30,16 @@ import org.slf4j.LoggerFactory;
  */
 public class SyncWatchEventService {
 
-	public static SyncWatchEvent addSyncWatchEvent(String filePath, String kind)
+	public static SyncWatchEvent addSyncWatchEvent(
+			String filePath, String kind, long syncAccountId)
 		throws Exception {
 
 		SyncWatchEvent syncWatchEvent = new SyncWatchEvent();
 
 		syncWatchEvent.setFilePath(filePath);
 		syncWatchEvent.setKind(kind);
+		syncWatchEvent.setSyncAccountId(syncAccountId);
+		syncWatchEvent.setTimestamp(System.currentTimeMillis());
 
 		_syncWatchEventPersistence.create(syncWatchEvent);
 
@@ -50,6 +56,19 @@ public class SyncWatchEventService {
 			}
 
 			return null;
+		}
+	}
+
+	public static List<SyncWatchEvent> findAll() {
+		try {
+			return _syncWatchEventPersistence.queryForAll();
+		}
+		catch (SQLException sqle) {
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(sqle.getMessage(), sqle);
+			}
+
+			return Collections.emptyList();
 		}
 	}
 

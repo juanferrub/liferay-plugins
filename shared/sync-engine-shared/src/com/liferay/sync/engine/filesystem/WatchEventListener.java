@@ -28,6 +28,8 @@ public interface WatchEventListener {
 
 	public void entryModify(Path filePath, WatchEvent<Path> watchEvent);
 
+	public long getSyncAccountId();
+
 	public void overflow(Path filePath, WatchEvent<Path> watchEvent);
 
 }
