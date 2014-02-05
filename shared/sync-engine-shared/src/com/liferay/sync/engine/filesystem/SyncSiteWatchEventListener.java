@@ -14,10 +14,15 @@
 
 package com.liferay.sync.engine.filesystem;
 
+import com.liferay.sync.engine.model.SyncFile;
+import com.liferay.sync.engine.model.SyncWatchEvent;
+import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncWatchEventService;
+import com.liferay.sync.engine.util.FilePathNameUtil;
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.WatchEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,36 +37,36 @@ public class SyncSiteWatchEventListener extends BaseWatchEventListener {
 	}
 
 	@Override
-	public void entryCreate(Path filePath, WatchEvent<Path> watchEvent) {
-		addSyncWatchEvent(filePath, watchEvent);
+	public void watchEvent(Path filePath, String kindName) {
+		addSyncWatchEvent(filePath, kindName);
 	}
 
-	@Override
-	public void entryDelete(Path filePath, WatchEvent<Path> watchEvent) {
-		addSyncWatchEvent(filePath, watchEvent);
-	}
-
-	@Override
-	public void entryModify(Path filePath, WatchEvent<Path> watchEvent) {
-		addSyncWatchEvent(filePath, watchEvent);
-	}
-
-	@Override
-	public void overflow(Path filePath, WatchEvent<Path> watchEvent) {
-		addSyncWatchEvent(filePath, watchEvent);
-	}
-
-	protected void addSyncWatchEvent(
-		Path filePath, WatchEvent<Path> watchEvent) {
-
+	protected void addSyncWatchEvent(Path filePath, String kindName) {
 		try {
 			SyncWatchEventService.addSyncWatchEvent(
-				filePath.toString(), watchEvent.kind().name(),
-				getSyncAccountId());
+				FilePathNameUtil.getFilePathName(filePath),
+				getFileType(filePath, kindName), kindName, getSyncAccountId());
 		}
 		catch (Exception e) {
 			_logger.error(e.getMessage(), e);
 		}
+	}
+
+	protected String getFileType(Path filePath, String kindName) {
+		if (kindName.equals(SyncWatchEvent.ENTRY_DELETE)) {
+			SyncFile syncFile = SyncFileService.fetchSyncFile(
+				FilePathNameUtil.getFilePathName(filePath), getSyncAccountId());
+
+			if (syncFile != null) {
+				return syncFile.getType();
+			}
+		}
+
+		if (Files.isDirectory(filePath, LinkOption.NOFOLLOW_LINKS)) {
+			return SyncFile.TYPE_FOLDER;
+		}
+
+		return SyncFile.TYPE_FILE;
 	}
 
 	private static Logger _logger = LoggerFactory.getLogger(
