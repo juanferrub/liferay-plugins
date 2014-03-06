@@ -16,13 +16,16 @@ package com.liferay.sync.engine;
 
 import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.service.SyncAccountService;
-import com.liferay.sync.engine.upgrade.UpgradeProcessSuite;
+import com.liferay.sync.engine.session.Session;
+import com.liferay.sync.engine.session.SessionManager;
+import com.liferay.sync.engine.upgrade.util.UpgradeUtil;
 import com.liferay.sync.engine.util.FilePathNameUtil;
-import com.liferay.sync.engine.util.HttpUtil;
 import com.liferay.sync.engine.util.LoggerUtil;
 import com.liferay.sync.engine.util.PropsKeys;
 import com.liferay.sync.engine.util.PropsUtil;
+import com.liferay.sync.engine.util.StreamUtil;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.nio.file.Path;
@@ -30,6 +33,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.ResponseHandler;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,11 +44,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Shinn Lok
  */
 @PowerMockIgnore("javax.crypto.*")
-@PrepareForTest(HttpUtil.class)
+@PrepareForTest(SessionManager.class)
 public abstract class BaseTestCase {
 
 	@Before
@@ -55,16 +62,22 @@ public abstract class BaseTestCase {
 
 		LoggerUtil.initLogger();
 
-		UpgradeProcessSuite upgradeProcessSuite = new UpgradeProcessSuite();
-
-		upgradeProcessSuite.upgrade();
+		UpgradeUtil.upgrade();
 
 		filePathName = FilePathNameUtil.fixFilePathName(
 			System.getProperty("user.home") + "/liferay-sync-test");
 
 		syncAccount = SyncAccountService.addSyncAccount(
-			filePathName, "test@liferay.com", "test",
+			filePathName, 10, "test@liferay.com", "test",
 			"http://localhost:8080/api/jsonws");
+
+		syncAccount.setActive(true);
+
+		SyncAccountService.update(syncAccount);
+
+		PowerMockito.mockStatic(SessionManager.class);
+
+		_session = Mockito.mock(Session.class);
 	}
 
 	@After
@@ -76,26 +89,62 @@ public abstract class BaseTestCase {
 		SyncAccountService.deleteSyncAccount(syncAccount.getSyncAccountId());
 	}
 
-	protected void setMockPostResponse(String fileName) throws Exception {
-		PowerMockito.mockStatic(HttpUtil.class);
+	protected String readResponse(String fileName) {
+		InputStream inputStream = null;
 
-		Class<?> clazz = getClass();
+		try {
+			Class<?> clazz = getClass();
 
-		InputStream inputStream = clazz.getResourceAsStream(fileName);
+			inputStream = clazz.getResourceAsStream(fileName);
 
-		String response = IOUtils.toString(inputStream);
+			return IOUtils.toString(inputStream);
+		}
+		catch (IOException ioe) {
+			_logger.error(ioe.getMessage(), ioe);
 
-		inputStream.close();
+			return null;
+		}
+		finally {
+			StreamUtil.cleanUp(inputStream);
+		}
+	}
+
+	protected void setGetResponse(String fileName) throws Exception {
+		Mockito.when(
+			SessionManager.getSession(Mockito.anyLong())
+		).thenReturn(
+			_session
+		);
 
 		Mockito.when(
-			HttpUtil.executePost(
-				Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())
+			_session.executeGet(
+				Mockito.anyString(), Mockito.any(ResponseHandler.class))
 		).thenReturn(
-			response
+			readResponse(fileName)
+		);
+	}
+
+	protected void setPostResponse(String fileName) throws Exception {
+		Mockito.when(
+			SessionManager.getSession(Mockito.anyLong())
+		).thenReturn(
+			_session
+		);
+
+		Mockito.when(
+			_session.executePost(
+				Mockito.anyString(), Mockito.anyMap(),
+				Mockito.any(ResponseHandler.class))
+		).thenReturn(
+			readResponse(fileName)
 		);
 	}
 
 	protected String filePathName;
 	protected SyncAccount syncAccount;
+
+	private static Logger _logger = LoggerFactory.getLogger(BaseTestCase.class);
+
+	private Session _session;
 
 }

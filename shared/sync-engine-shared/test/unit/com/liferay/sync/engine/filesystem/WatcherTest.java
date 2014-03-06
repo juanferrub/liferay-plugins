@@ -23,12 +23,20 @@ import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncSiteService;
 import com.liferay.sync.engine.service.SyncWatchEventService;
 import com.liferay.sync.engine.util.FilePathNameUtil;
+import com.liferay.sync.engine.util.FileUtil;
+import com.liferay.sync.engine.util.OSDetector;
 
+import java.io.BufferedWriter;
+
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -50,12 +58,36 @@ public class WatcherTest extends BaseTestCase {
 		super.setUp();
 
 		_syncSite = SyncSiteService.addSyncSite(
-			filePathName + "/test-site", 10184, syncAccount.getSyncAccountId());
+			10158, filePathName + "/test-site", 10184,
+			syncAccount.getSyncAccountId());
+
+		_syncSite.setActive(true);
+
+		SyncSiteService.update(_syncSite);
+
+		ScheduledExecutorService scheduledExecutorService =
+			Executors.newSingleThreadScheduledExecutor();
+
+		scheduledExecutorService.scheduleAtFixedRate(
+			new SyncWatchEventProcessor(), 0, 1, TimeUnit.SECONDS);
+
+		WatchEventListener watchEventListener = new SyncSiteWatchEventListener(
+			syncAccount.getSyncAccountId());
+
+		Path filePath = Paths.get(syncAccount.getFilePathName());
+
+		_watcher = new Watcher(filePath, true, watchEventListener);
+
+		Thread thread = new Thread(_watcher);
+
+		thread.start();
 	}
 
 	@After
 	@Override
 	public void tearDown() throws Exception {
+		_watcher.close();
+
 		super.tearDown();
 
 		SyncAccountService.deleteSyncAccount(syncAccount.getSyncAccountId());
@@ -63,7 +95,7 @@ public class WatcherTest extends BaseTestCase {
 		SyncSiteService.deleteSyncSite(_syncSite.getSyncSiteId());
 
 		for (SyncFile syncFile : _syncFiles) {
-			SyncFileService.deleteSyncFile(syncFile.getSyncFileId());
+			SyncFileService.deleteSyncFile(syncFile);
 		}
 
 		for (SyncWatchEvent syncWatchEvent : SyncWatchEventService.findAll()) {
@@ -74,29 +106,13 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunAddFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_add_file.json");
+		setPostResponse("dependencies/watcher_test_add_file.json");
 
-		SyncWatchEventProcessor syncWatchEventProcessor =
-			new SyncWatchEventProcessor();
+		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
 
-		syncWatchEventProcessor.process();
+		Files.createFile(filePath);
 
-		WatchEventListener watchEventListener = new SyncSiteWatchEventListener(
-			syncAccount.getSyncAccountId());
-
-		Path filePath = Paths.get(syncAccount.getFilePathName());
-
-		Watcher watcher = new Watcher(filePath, true, watchEventListener);
-
-		Thread thread = new Thread(watcher);
-
-		thread.start();
-
-		Path addFilePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
-
-		Files.createFile(addFilePath);
-
-		Thread.sleep(5000);
+		sleep();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
@@ -105,34 +121,89 @@ public class WatcherTest extends BaseTestCase {
 	}
 
 	@Test
-	public void testRunDeleteFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_delete_file.json");
+	public void testRunAddFileToInactiveSite() throws Exception {
+		setPostResponse("dependencies/watcher_test_add_file.json");
 
-		SyncWatchEventProcessor syncWatchEventProcessor =
-			new SyncWatchEventProcessor();
+		_syncSite.setActive(false);
 
-		syncWatchEventProcessor.process();
+		SyncSiteService.update(_syncSite);
 
-		WatchEventListener watchEventListener = new SyncSiteWatchEventListener(
+		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
+
+		Files.createFile(filePath);
+
+		sleep();
+
+		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
 
-		Path filePath = Paths.get(syncAccount.getFilePathName());
+		Assert.assertEquals(2, _syncFiles.size());
+	}
 
-		Watcher watcher = new Watcher(filePath, true, watchEventListener);
+	@Test
+	public void testRunAddIgnoredFile() throws Exception {
+		setPostResponse("dependencies/watcher_test_add_file.json");
 
-		Thread thread = new Thread(watcher);
+		if (OSDetector.isWindows()) {
+			Path hiddenFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/hidden_file.txt");
 
-		thread.start();
+			Files.createFile(hiddenFilePath);
 
-		Path addFilePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
+			Files.setAttribute(hiddenFilePath, "dos:hidden", true);
 
-		Files.createFile(addFilePath);
+			Path shortcutFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/test.txt - Shortcut.lnk");
 
-		Thread.sleep(5000);
+			Files.createFile(shortcutFilePath);
+		}
+		else {
+			Path ignoredFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/.DS_Store");
 
-		Files.delete(addFilePath);
+			Files.createFile(ignoredFilePath);
 
-		Thread.sleep(5000);
+			Path symbolicLinkFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/symbolic_link");
+
+			Files.createSymbolicLink(symbolicLinkFilePath, ignoredFilePath);
+		}
+
+		sleep();
+
+		_syncFiles = SyncFileService.findSyncFiles(
+			syncAccount.getSyncAccountId());
+
+		Assert.assertEquals(2, _syncFiles.size());
+	}
+
+	@Test
+	public void testRunAddRootFile() throws Exception {
+		setPostResponse("dependencies/watcher_test_add_file.json");
+
+		Path filePath = Paths.get(syncAccount.getFilePathName() + "/test.txt");
+
+		Files.createFile(filePath);
+
+		_syncFiles = SyncFileService.findSyncFiles(
+			syncAccount.getSyncAccountId());
+
+		Assert.assertEquals(2, _syncFiles.size());
+	}
+
+	@Test
+	public void testRunDeleteFile() throws Exception {
+		setPostResponse("dependencies/watcher_test_delete_file.json");
+
+		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
+
+		Files.createFile(filePath);
+
+		sleep();
+
+		Files.delete(filePath);
+
+		sleep();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
@@ -140,44 +211,63 @@ public class WatcherTest extends BaseTestCase {
 		Assert.assertEquals(2, _syncFiles.size());
 		Assert.assertNull(
 			SyncFileService.fetchSyncFile(
-				FilePathNameUtil.getFilePathName(addFilePath),
+				FilePathNameUtil.getFilePathName(filePath),
 				syncAccount.getSyncAccountId()));
 	}
 
 	@Test
-	public void testRunMoveFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_move_file.json");
+	public void testRunModifyFile() throws Exception {
+		setPostResponse("dependencies/watcher_test_modify_file.json");
 
-		SyncWatchEventProcessor syncWatchEventProcessor =
-			new SyncWatchEventProcessor();
+		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
 
-		syncWatchEventProcessor.process();
+		Files.createFile(filePath);
 
-		WatchEventListener watchEventListener = new SyncSiteWatchEventListener(
+		sleep();
+
+		BufferedWriter bufferedWriter = Files.newBufferedWriter(
+			filePath, StandardCharsets.UTF_8);
+
+		bufferedWriter.write("Hello World");
+
+		bufferedWriter.close();
+
+		sleep();
+
+		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
 
-		Path filePath = Paths.get(syncAccount.getFilePathName());
+		Assert.assertEquals(3, _syncFiles.size());
 
-		Watcher watcher = new Watcher(filePath, true, watchEventListener);
+		SyncFile syncFile = SyncFileService.fetchSyncFile(
+			FilePathNameUtil.getFilePathName(filePath),
+			syncAccount.getSyncAccountId());
 
-		Thread thread = new Thread(watcher);
+		Assert.assertEquals(
+			FileUtil.getChecksum(filePath), syncFile.getChecksum());
+		Assert.assertEquals(Files.size(filePath), syncFile.getSize());
+	}
 
-		thread.start();
+	@Test
+	public void testRunMoveFile() throws Exception {
+		setPostResponse("dependencies/watcher_test_move_file.json");
 
-		Path addFilePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
+		Path sourceFilePath = Paths.get(
+			_syncSite.getFilePathName() + "/test.txt");
 
-		Files.createFile(addFilePath);
+		Files.createFile(sourceFilePath);
 
-		Path moveFilePath = Paths.get(_syncSite.getFilePathName() + "/test");
+		Path targetFilePath = Paths.get(_syncSite.getFilePathName() + "/test");
 
-		Files.createDirectory(moveFilePath);
+		Files.createDirectory(targetFilePath);
 
-		Thread.sleep(5000);
+		sleep();
 
 		Files.move(
-			addFilePath, moveFilePath.resolve(addFilePath.getFileName()));
+			sourceFilePath,
+			targetFilePath.resolve(sourceFilePath.getFileName()));
 
-		Thread.sleep(5000);
+		sleep();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
@@ -185,42 +275,27 @@ public class WatcherTest extends BaseTestCase {
 		Assert.assertEquals(4, _syncFiles.size());
 		Assert.assertNotNull(
 			SyncFileService.fetchSyncFile(
-				FilePathNameUtil.getFilePathName(moveFilePath),
+				FilePathNameUtil.getFilePathName(targetFilePath),
 				syncAccount.getSyncAccountId()));
 	}
 
 	@Test
 	public void testRunRenameFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_rename_file.json");
+		setPostResponse("dependencies/watcher_test_rename_file.json");
 
-		SyncWatchEventProcessor syncWatchEventProcessor =
-			new SyncWatchEventProcessor();
+		Path sourceFilePath = Paths.get(
+			_syncSite.getFilePathName() + "/test.txt");
 
-		syncWatchEventProcessor.process();
+		Files.createFile(sourceFilePath);
 
-		WatchEventListener watchEventListener = new SyncSiteWatchEventListener(
-			syncAccount.getSyncAccountId());
+		sleep();
 
-		Path filePath = Paths.get(syncAccount.getFilePathName());
-
-		Watcher watcher = new Watcher(filePath, true, watchEventListener);
-
-		Thread thread = new Thread(watcher);
-
-		thread.start();
-
-		Path addFilePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
-
-		Files.createFile(addFilePath);
-
-		Thread.sleep(5000);
-
-		Path renameFilePath = Paths.get(
+		Path targetFilePath = Paths.get(
 			_syncSite.getFilePathName() + "/test2.txt");
 
-		Files.move(addFilePath, renameFilePath);
+		Files.move(sourceFilePath, targetFilePath);
 
-		Thread.sleep(5000);
+		sleep();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
@@ -228,11 +303,21 @@ public class WatcherTest extends BaseTestCase {
 		Assert.assertEquals(3, _syncFiles.size());
 		Assert.assertNotNull(
 			SyncFileService.fetchSyncFile(
-				FilePathNameUtil.getFilePathName(renameFilePath),
+				FilePathNameUtil.getFilePathName(targetFilePath),
 				syncAccount.getSyncAccountId()));
+	}
+
+	protected void sleep() throws InterruptedException {
+		if (OSDetector.isApple()) {
+			Thread.sleep(3000);
+		}
+		else {
+			Thread.sleep(1000);
+		}
 	}
 
 	private List<SyncFile> _syncFiles;
 	private SyncSite _syncSite;
+	private Watcher _watcher;
 
 }

@@ -14,6 +14,7 @@
 
 package com.liferay.sync.engine.service;
 
+import com.liferay.sync.engine.model.ModelListener;
 import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.persistence.SyncAccountPersistence;
@@ -25,6 +26,11 @@ import java.nio.file.Paths;
 
 import java.sql.SQLException;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +40,8 @@ import org.slf4j.LoggerFactory;
 public class SyncAccountService {
 
 	public static SyncAccount addSyncAccount(
-			String filePathName, String login, String password, String url)
+			String filePathName, int interval, String login, String password,
+			String url)
 		throws Exception {
 
 		// Sync account
@@ -42,6 +49,7 @@ public class SyncAccountService {
 		SyncAccount syncAccount = new SyncAccount();
 
 		syncAccount.setFilePathName(filePathName);
+		syncAccount.setInterval(interval);
 		syncAccount.setLogin(login);
 		syncAccount.setPassword(Encryptor.encrypt(password));
 		syncAccount.setUrl(url);
@@ -50,9 +58,7 @@ public class SyncAccountService {
 
 		// Sync file
 
-		if (Files.notExists(Paths.get(filePathName))) {
-			Files.createDirectory(Paths.get(filePathName));
-		}
+		Files.createDirectories(Paths.get(filePathName));
 
 		SyncFileService.addSyncFile(
 			null, null, filePathName, FileUtil.getFileKey(filePathName),
@@ -86,6 +92,39 @@ public class SyncAccountService {
 		}
 	}
 
+	public static List<SyncAccount> findAll() {
+		try {
+			return _syncAccountPersistence.queryForAll();
+		}
+		catch (SQLException sqle) {
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(sqle.getMessage(), sqle);
+			}
+
+			return Collections.emptyList();
+		}
+	}
+
+	public static Set<Long> getActiveSyncAccountIds() {
+		try {
+			if (_activeSyncAccountIds != null) {
+				return _activeSyncAccountIds;
+			}
+
+			_activeSyncAccountIds = new HashSet<Long>(
+				_syncAccountPersistence.findByActive(true));
+
+			return _activeSyncAccountIds;
+		}
+		catch (SQLException sqle) {
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(sqle.getMessage(), sqle);
+			}
+
+			return Collections.emptySet();
+		}
+	}
+
 	public static SyncAccountPersistence getSyncAccountPersistence() {
 		if (_syncAccountPersistence != null) {
 			return _syncAccountPersistence;
@@ -101,6 +140,22 @@ public class SyncAccountService {
 		}
 
 		return _syncAccountPersistence;
+	}
+
+	public static void registerModelListener(
+		ModelListener<SyncAccount> modelListener) {
+
+		_syncAccountPersistence.registerModelListener(modelListener);
+	}
+
+	public static void setActiveSyncAccountIds(Set<Long> activeSyncAccountIds) {
+		_activeSyncAccountIds = activeSyncAccountIds;
+	}
+
+	public static void unregisterModelListener(
+		ModelListener<SyncAccount> modelListener) {
+
+		_syncAccountPersistence.unregisterModelListener(modelListener);
 	}
 
 	public static SyncAccount update(SyncAccount syncAccount) {
@@ -121,6 +176,7 @@ public class SyncAccountService {
 	private static Logger _logger = LoggerFactory.getLogger(
 		SyncAccountService.class);
 
+	private static Set<Long> _activeSyncAccountIds;
 	private static SyncAccountPersistence _syncAccountPersistence =
 		getSyncAccountPersistence();
 
