@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -24,6 +24,7 @@ import com.liferay.sync.engine.service.persistence.SyncFilePersistence;
 import com.liferay.sync.engine.service.persistence.SyncPropPersistence;
 import com.liferay.sync.engine.service.persistence.SyncSitePersistence;
 import com.liferay.sync.engine.service.persistence.SyncWatchEventPersistence;
+import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.PropsValues;
 import com.liferay.sync.engine.util.ReleaseInfo;
 
@@ -43,7 +44,8 @@ public class UpgradeUtil {
 			createTables();
 
 			Path filePath = Paths.get(
-				PropsValues.SYNC_CONFIGURATION_DIRECTORY + "/files");
+				FileUtil.getFilePathName(
+					PropsValues.SYNC_CONFIGURATION_DIRECTORY, "files"));
 
 			Files.createDirectories(filePath);
 		}
@@ -51,7 +53,7 @@ public class UpgradeUtil {
 			return;
 		}
 
-		SyncPropService.addSyncProp(
+		SyncPropService.updateSyncProp(
 			"buildNumber", ReleaseInfo.getBuildNumber());
 	}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,9 @@
 
 package com.liferay.sync.engine.service.persistence;
 
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
 import com.liferay.sync.engine.model.SyncWatchEvent;
@@ -33,6 +35,16 @@ public class SyncWatchEventPersistence
 		super(SyncWatchEvent.class);
 	}
 
+	public void deleteBySyncAccountId(long syncAccountId) throws SQLException {
+		DeleteBuilder<SyncWatchEvent, Long> deleteBuilder = deleteBuilder();
+
+		Where<SyncWatchEvent, Long> where = deleteBuilder.where();
+
+		where.eq("syncAccountId", syncAccountId);
+
+		delete(deleteBuilder.prepare());
+	}
+
 	public SyncWatchEvent fetchByE_F_T(
 			String eventType, String filePathName, long timestamp)
 		throws SQLException {
@@ -45,7 +57,7 @@ public class SyncWatchEventPersistence
 
 		where.and();
 
-		where.eq("filePathName", filePathName);
+		where.eq("filePathName", new SelectArg(filePathName));
 
 		where.and();
 

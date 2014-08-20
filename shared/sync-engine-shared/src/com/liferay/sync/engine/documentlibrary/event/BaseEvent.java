@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,8 @@
 
 package com.liferay.sync.engine.documentlibrary.event;
 
-import com.liferay.sync.engine.documentlibrary.handler.BaseHandler;
+import com.liferay.sync.engine.SyncEngine;
+import com.liferay.sync.engine.documentlibrary.handler.Handler;
 import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.session.Session;
@@ -22,19 +23,13 @@ import com.liferay.sync.engine.session.SessionManager;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.conn.HttpHostConnectException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Shinn Lok
  */
-public abstract class BaseEvent implements Runnable {
+public abstract class BaseEvent implements Event {
 
 	public BaseEvent(
 		long syncAccountId, String urlPath, Map<String, Object> parameters) {
@@ -44,88 +39,102 @@ public abstract class BaseEvent implements Runnable {
 		_parameters = parameters;
 	}
 
-	public <T> T executeGet(
-			String urlPath, ResponseHandler<? extends T> responseHandler)
-		throws Exception {
-
+	public void executeAsynchronousGet(String urlPath) throws Exception {
 		Session session = SessionManager.getSession(_syncAccountId);
 
-		return session.executeGet(urlPath, responseHandler);
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		session.executeAsynchronousGet(
+			syncAccount.getUrl() + urlPath, _handler);
 	}
 
-	public <T> T executePost(
-			String urlPath, Map<String, Object> parameters,
-			ResponseHandler<? extends T> responseHandler)
+	public void executeAsynchronousPost(
+			String urlPath, Map<String, Object> parameters)
 		throws Exception {
 
 		Session session = SessionManager.getSession(_syncAccountId);
 
-		return session.executePost(urlPath, parameters, responseHandler);
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		session.executeAsynchronousPost(
+			syncAccount.getUrl() + "/api/jsonws" + urlPath, parameters,
+			_handler);
+	}
+
+	public void executeGet(String urlPath) throws Exception {
+		Session session = SessionManager.getSession(_syncAccountId);
+
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		session.executeGet(syncAccount.getUrl() + urlPath, _handler);
+	}
+
+	public void executePost(String urlPath, Map<String, Object> parameters)
+		throws Exception {
+
+		Session session = SessionManager.getSession(_syncAccountId);
+
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		session.executePost(
+			syncAccount.getUrl() + "/api/jsonws" + urlPath, parameters,
+			_handler);
+	}
+
+	@Override
+	public Map<String, Object> getParameters() {
+		return _parameters;
+	}
+
+	@Override
+	public Object getParameterValue(String key) {
+		return _parameters.get(key);
+	}
+
+	@Override
+	public long getSyncAccountId() {
+		return _syncAccountId;
 	}
 
 	@Override
 	public void run() {
-		try {
-			String response = processRequest();
+		if (!SyncEngine.isRunning()) {
+			return;
+		}
 
-			if (response == null) {
-				return;
+		_handler = getHandler();
+
+		try {
+			if (_logger.isTraceEnabled()) {
+				Class<?> clazz = this.getClass();
+
+				_logger.trace("Processing {}", clazz.getSimpleName());
 			}
 
-			processResponse(response);
+			processRequest();
 		}
 		catch (Exception e) {
-			_logger.error(e.getMessage(), e);
-
-			SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
-				_syncAccountId);
-
-			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
-
-			if (e instanceof HttpHostConnectException) {
-				syncAccount.setUiEvent(
-					SyncAccount.UI_EVENT_CONNECTION_EXCEPTION);
-			}
-			else if (e instanceof HttpResponseException) {
-				HttpResponseException hre = (HttpResponseException)e;
-
-				int statusCode = hre.getStatusCode();
-
-				if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
-					syncAccount.setUiEvent(
-						SyncAccount.UI_EVENT_AUTHENTICATION_EXCEPTION);
-				}
-				else {
-					syncAccount.setUiEvent(
-						SyncAccount.UI_EVENT_CONNECTION_EXCEPTION);
-				}
-			}
-
-			SyncAccountService.update(syncAccount);
+			_handler.handleException(e);
 		}
 	}
 
-	protected Map<String, Object> getParameters() {
-		return _parameters;
+	protected abstract Handler<Void> getHandler();
+
+	protected void processAsynchronousRequest() throws Exception {
+		executeAsynchronousPost(_urlPath, _parameters);
 	}
 
-	protected Object getParameterValue(String key) {
-		return _parameters.get(key);
+	protected void processRequest() throws Exception {
+		executePost(_urlPath, _parameters);
 	}
-
-	protected long getSyncAccountId() {
-		return _syncAccountId;
-	}
-
-	protected String processRequest() throws Exception {
-		return executePost(_urlPath, _parameters, new BaseHandler());
-	}
-
-	protected abstract void processResponse(String response)
-		throws Exception;
 
 	private static Logger _logger = LoggerFactory.getLogger(BaseEvent.class);
 
+	private Handler<Void> _handler;
 	private Map<String, Object> _parameters;
 	private long _syncAccountId;
 	private String _urlPath;

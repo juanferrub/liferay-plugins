@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,13 +25,42 @@ import com.liferay.sync.engine.service.persistence.BasePersistenceImpl;
 @DatabaseTable(daoClass = BasePersistenceImpl.class, tableName = "SyncAccount")
 public class SyncAccount extends StateAwareModel {
 
-	public static final int STATE_CONNECTED = 1;
+	public static final int STATE_CONNECTED = 2;
+
+	public static final int STATE_CONNECTING = 1;
 
 	public static final int STATE_DISCONNECTED = 0;
 
 	public static final int UI_EVENT_AUTHENTICATION_EXCEPTION = 1;
 
 	public static final int UI_EVENT_CONNECTION_EXCEPTION = 2;
+
+	public static final int UI_EVENT_SYNC_ACCOUNT_FOLDER_MISSING = 3;
+
+	public static final int UI_EVENT_SYNC_SERVICES_NOT_ACTIVE = 6;
+
+	public static final int UI_EVENT_SYNC_WEB_MISSING = 4;
+
+	public static final int UI_EVENT_SYNC_WEB_OUT_OF_DATE = 5;
+
+	@Override
+	public boolean equals(Object object) {
+		if (!(object instanceof SyncAccount)) {
+			return false;
+		}
+		else if (object == this) {
+			return true;
+		}
+
+		SyncAccount syncAccount = (SyncAccount)object;
+
+		if (syncAccount.getSyncAccountId() == syncAccountId) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	public boolean getActive() {
 		return active;
@@ -41,28 +70,61 @@ public class SyncAccount extends StateAwareModel {
 		return filePathName;
 	}
 
-	public int getInterval() {
-		return interval;
-	}
-
 	public String getLogin() {
 		return login;
+	}
+
+	public int getMaxConnections() {
+		return maxConnections;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String getPassword() {
 		return password;
 	}
 
+	public int getPollInterval() {
+		return pollInterval;
+	}
+
+	public boolean getSocialOfficeInstalled() {
+		return socialOfficeInstalled;
+	}
+
 	public long getSyncAccountId() {
 		return syncAccountId;
+	}
+
+	public boolean getTrustSelfSigned() {
+		return trustSelfSigned;
 	}
 
 	public String getUrl() {
 		return url;
 	}
 
+	public long getUserId() {
+		return userId;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int)(syncAccountId ^ (syncAccountId >>> 32));
+	}
+
 	public boolean isActive() {
 		return getActive();
+	}
+
+	public boolean isSocialOfficeInstalled() {
+		return getSocialOfficeInstalled();
+	}
+
+	public boolean isTrustSelfSigned() {
+		return getTrustSelfSigned();
 	}
 
 	public void setActive(boolean active) {
@@ -73,24 +135,44 @@ public class SyncAccount extends StateAwareModel {
 		this.filePathName = filePathName;
 	}
 
-	public void setInterval(int interval) {
-		this.interval = interval;
-	}
-
 	public void setLogin(String login) {
 		this.login = login;
+	}
+
+	public void setMaxConnections(int maxConnections) {
+		this.maxConnections = maxConnections;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	public void setPollInterval(int pollInterval) {
+		this.pollInterval = pollInterval;
+	}
+
+	public void setSocialOfficeInstalled(boolean socialOfficeInstalled) {
+		this.socialOfficeInstalled = socialOfficeInstalled;
+	}
+
 	public void setSyncAccountId(long syncAccountId) {
 		this.syncAccountId = syncAccountId;
 	}
 
+	public void setTrustSelfSigned(boolean trustSelfSigned) {
+		this.trustSelfSigned = trustSelfSigned;
+	}
+
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
 	}
 
 	@DatabaseField(useGetSet = true)
@@ -99,19 +181,34 @@ public class SyncAccount extends StateAwareModel {
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String filePathName;
 
-	@DatabaseField(useGetSet = true)
-	protected int interval;
-
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String login;
+
+	@DatabaseField(useGetSet = true)
+	protected int maxConnections;
+
+	@DatabaseField(useGetSet = true)
+	protected String name;
 
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String password;
 
+	@DatabaseField(useGetSet = true)
+	protected int pollInterval;
+
+	@DatabaseField(useGetSet = true)
+	protected boolean socialOfficeInstalled;
+
 	@DatabaseField(generatedId = true, useGetSet = true)
 	protected long syncAccountId;
 
+	@DatabaseField(useGetSet = true)
+	protected boolean trustSelfSigned;
+
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String url;
+
+	@DatabaseField(useGetSet = true)
+	protected long userId;
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -133,9 +133,7 @@ public class DLActivityInterpreter extends SOSocialActivityInterpreter {
 
 		sb.append(
 			StringUtil.shorten(
-				HtmlUtil.escape(
-					assetRenderer.getSummary(
-						serviceContext.getLocale()), 200)));
+				HtmlUtil.escape(assetRenderer.getSummary(), 200)));
 
 		sb.append("</div></div></div>");
 
@@ -186,10 +184,10 @@ public class DLActivityInterpreter extends SOSocialActivityInterpreter {
 		sb.append("&title=");
 		sb.append(HttpUtil.encodeURL(fileEntry.getTitle()));
 
-		String downloadLink = wrapLink(
+		String downloadLink = wrapLinkWithIcon(
 			sb.toString(), serviceContext.translate("download"));
 
-		return "<span>" + downloadLink + "</span>";
+		return "<span class=\"download-link\">" + downloadLink + "</span>";
 	}
 
 	@Override
@@ -289,6 +287,19 @@ public class DLActivityInterpreter extends SOSocialActivityInterpreter {
 		}
 
 		return titlePattern;
+	}
+
+	protected String wrapLinkWithIcon(String link, String text) {
+		StringBundler sb = new StringBundler(6);
+
+		sb.append("<a href=\"");
+		sb.append(link);
+		sb.append("\">");
+		sb.append("<i class=\"icon-download\"></i>");
+		sb.append(text);
+		sb.append("</a>");
+
+		return sb.toString();
 	}
 
 	private static final String[] _CLASS_NAMES = {DLFileEntry.class.getName()};

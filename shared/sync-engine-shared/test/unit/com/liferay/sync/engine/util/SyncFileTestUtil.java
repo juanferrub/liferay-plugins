@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,7 +36,7 @@ public class SyncFileTestUtil {
 		throws Exception {
 
 		SyncFile syncFile = SyncFileService.addSyncFile(
-			null, null, null, null, filePathName, null, null, parentFolderId,
+			null, null, null, filePathName, null, null, parentFolderId,
 			repositoryId, syncAccountId, SyncFile.TYPE_FILE);
 
 		if (typePK == 0) {
@@ -71,7 +71,7 @@ public class SyncFileTestUtil {
 		throws Exception {
 
 		SyncFile syncFile = SyncFileService.addSyncFile(
-			null, null, null, null, filePathName, null, null, parentFolderId,
+			null, null, null, filePathName, null, null, parentFolderId,
 			repositoryId, syncAccountId, SyncFile.TYPE_FOLDER);
 
 		if (typePK == 0) {

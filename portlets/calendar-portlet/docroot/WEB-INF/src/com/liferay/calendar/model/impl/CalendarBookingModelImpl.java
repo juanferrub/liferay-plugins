@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,6 @@ import com.liferay.portal.LocaleException;
 import com.liferay.portal.NoSuchModelException;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.trash.TrashHandler;
@@ -113,7 +112,7 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 			{ "statusByUserName", Types.VARCHAR },
 			{ "statusDate", Types.TIMESTAMP }
 		};
-	public static final String TABLE_SQL_CREATE = "create table CalendarBooking (uuid_ VARCHAR(75) null,calendarBookingId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,resourceBlockId LONG,calendarId LONG,calendarResourceId LONG,parentCalendarBookingId LONG,title STRING null,description STRING null,location STRING null,startTime LONG,endTime LONG,allDay BOOLEAN,recurrence STRING null,firstReminder LONG,firstReminderType VARCHAR(75) null,secondReminder LONG,secondReminderType VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE = "create table CalendarBooking (uuid_ VARCHAR(75) null,calendarBookingId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,resourceBlockId LONG,calendarId LONG,calendarResourceId LONG,parentCalendarBookingId LONG,title STRING null,description TEXT null,location STRING null,startTime LONG,endTime LONG,allDay BOOLEAN,recurrence STRING null,firstReminder LONG,firstReminderType VARCHAR(75) null,secondReminder LONG,secondReminderType VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table CalendarBooking";
 	public static final String ORDER_BY_JPQL = " ORDER BY calendarBooking.startTime ASC, calendarBooking.title ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY CalendarBooking.startTime ASC, CalendarBooking.title ASC";
@@ -538,7 +537,7 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 	}
 
 	@Override
-	public String getUserUuid() throws SystemException {
+	public String getUserUuid() {
 		try {
 			User user = UserLocalServiceUtil.getUserById(getUserId());
 
@@ -1048,7 +1047,7 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 	}
 
 	@Override
-	public String getStatusByUserUuid() throws SystemException {
+	public String getStatusByUserUuid() {
 		try {
 			User user = UserLocalServiceUtil.getUserById(getStatusByUserId());
 
@@ -1097,7 +1096,7 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 	}
 
 	@Override
-	public TrashEntry getTrashEntry() throws PortalException, SystemException {
+	public TrashEntry getTrashEntry() throws PortalException {
 		if (!isInTrash()) {
 			return null;
 		}
@@ -1111,7 +1110,8 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 
 		TrashHandler trashHandler = getTrashHandler();
 
-		if (!Validator.isNull(trashHandler.getContainerModelClassName())) {
+		if (!Validator.isNull(trashHandler.getContainerModelClassName(
+						getPrimaryKey()))) {
 			ContainerModel containerModel = null;
 
 			try {
@@ -1128,7 +1128,8 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 					return trashedModel.getTrashEntry();
 				}
 
-				trashHandler = TrashHandlerRegistryUtil.getTrashHandler(trashHandler.getContainerModelClassName());
+				trashHandler = TrashHandlerRegistryUtil.getTrashHandler(trashHandler.getContainerModelClassName(
+							containerModel.getContainerModelId()));
 
 				if (trashHandler == null) {
 					return null;
@@ -1166,7 +1167,8 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 		TrashHandler trashHandler = getTrashHandler();
 
 		if ((trashHandler == null) ||
-				Validator.isNull(trashHandler.getContainerModelClassName())) {
+				Validator.isNull(trashHandler.getContainerModelClassName(
+						getPrimaryKey()))) {
 			return false;
 		}
 
@@ -1188,7 +1190,7 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 	}
 
 	@Override
-	public boolean isInTrashExplicitly() throws SystemException {
+	public boolean isInTrashExplicitly() {
 		if (!isInTrash()) {
 			return false;
 		}
@@ -1201,6 +1203,22 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean isInTrashImplicitly() {
+		if (!isInTrash()) {
+			return false;
+		}
+
+		TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(getModelClassName(),
+				getTrashEntryClassPK());
+
+		if (trashEntry != null) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1346,19 +1364,28 @@ public class CalendarBookingModelImpl extends BaseModelImpl<CalendarBooking>
 			return StringPool.BLANK;
 		}
 
-		return LocalizationUtil.getDefaultLanguageId(xml);
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
+
+		return LocalizationUtil.getDefaultLanguageId(xml, defaultLocale);
 	}
 
 	@Override
 	public void prepareLocalizedFieldsForImport() throws LocaleException {
-		prepareLocalizedFieldsForImport(null);
+		Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
+
+		Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
+
+		Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(CalendarBooking.class.getName(),
+				getPrimaryKey(), defaultLocale, availableLocales);
+
+		prepareLocalizedFieldsForImport(defaultImportLocale);
 	}
 
 	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
-		Locale defaultLocale = LocaleUtil.getDefault();
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
 
 		String modelDefaultLanguageId = getDefaultLanguageId();
 

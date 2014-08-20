@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,9 +14,12 @@
 
 package com.liferay.sync.engine.service;
 
+import com.liferay.sync.engine.documentlibrary.event.GetSyncContextEvent;
 import com.liferay.sync.engine.model.ModelListener;
 import com.liferay.sync.engine.model.SyncAccount;
+import com.liferay.sync.engine.model.SyncAccountModelListener;
 import com.liferay.sync.engine.model.SyncFile;
+import com.liferay.sync.engine.model.SyncSite;
 import com.liferay.sync.engine.service.persistence.SyncAccountPersistence;
 import com.liferay.sync.engine.util.Encryptor;
 import com.liferay.sync.engine.util.FileUtil;
@@ -27,8 +30,10 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -39,9 +44,33 @@ import org.slf4j.LoggerFactory;
  */
 public class SyncAccountService {
 
+	public static SyncAccount activateSyncAccount(
+		long syncAccountId, boolean reset) {
+
+		SyncAccount syncAccount = fetchSyncAccount(syncAccountId);
+
+		syncAccount.setActive(true);
+
+		update(syncAccount);
+
+		if (reset) {
+			List<SyncSite> syncSites = SyncSiteService.findSyncSites(
+				syncAccountId);
+
+			for (SyncSite syncSite : syncSites) {
+				syncSite.setRemoteSyncTime(0);
+
+				SyncSiteService.update(syncSite);
+			}
+		}
+
+		return syncAccount;
+	}
+
 	public static SyncAccount addSyncAccount(
-			String filePathName, int interval, String login, String password,
-			String url)
+			String filePathName, String login, int maxConnections, String name,
+			String password, int pollInterval, SyncSite[] syncSites,
+			boolean trustSelfSigned, String url)
 		throws Exception {
 
 		// Sync account
@@ -49,9 +78,12 @@ public class SyncAccountService {
 		SyncAccount syncAccount = new SyncAccount();
 
 		syncAccount.setFilePathName(filePathName);
-		syncAccount.setInterval(interval);
 		syncAccount.setLogin(login);
+		syncAccount.setMaxConnections(maxConnections);
+		syncAccount.setName(name);
 		syncAccount.setPassword(Encryptor.encrypt(password));
+		syncAccount.setPollInterval(pollInterval);
+		syncAccount.setTrustSelfSigned(trustSelfSigned);
 		syncAccount.setUrl(url);
 
 		_syncAccountPersistence.create(syncAccount);
@@ -61,9 +93,28 @@ public class SyncAccountService {
 		Files.createDirectories(Paths.get(filePathName));
 
 		SyncFileService.addSyncFile(
-			null, null, filePathName, FileUtil.getFileKey(filePathName),
-			filePathName, null, filePathName, 0, 0,
-			syncAccount.getSyncAccountId(), SyncFile.TYPE_FOLDER);
+			null, null, filePathName, filePathName, null, filePathName, 0, 0,
+			syncAccount.getSyncAccountId(), SyncFile.TYPE_SYSTEM);
+
+		// Sync sites
+
+		if (syncSites != null) {
+			for (SyncSite syncSite : syncSites) {
+				String syncSiteName = syncSite.getName();
+
+				if (!FileUtil.isValidFileName(syncSiteName)) {
+					syncSiteName = String.valueOf(syncSite.getGroupId());
+				}
+
+				syncSite.setFilePathName(
+					FileUtil.getFilePathName(
+						syncAccount.getFilePathName(), syncSiteName));
+
+				syncSite.setSyncAccountId(syncAccount.getSyncAccountId());
+
+				SyncSiteService.update(syncSite);
+			}
+		}
 
 		return syncAccount;
 	}
@@ -139,6 +190,8 @@ public class SyncAccountService {
 			}
 		}
 
+		registerModelListener(new SyncAccountModelListener());
+
 		return _syncAccountPersistence;
 	}
 
@@ -148,8 +201,65 @@ public class SyncAccountService {
 		_syncAccountPersistence.registerModelListener(modelListener);
 	}
 
-	public static void setActiveSyncAccountIds(Set<Long> activeSyncAccountIds) {
-		_activeSyncAccountIds = activeSyncAccountIds;
+	public static void resetActiveSyncAccountIds() {
+		_activeSyncAccountIds = null;
+	}
+
+	public static void setFilePathName(
+		long syncAccountId, String targetFilePathName) {
+
+		// Sync account
+
+		SyncAccount syncAccount = fetchSyncAccount(syncAccountId);
+
+		String sourceFilePathName = syncAccount.getFilePathName();
+
+		syncAccount.setFilePathName(targetFilePathName);
+
+		update(syncAccount);
+
+		// Sync files
+
+		List<SyncFile> syncFiles = SyncFileService.findSyncFiles(syncAccountId);
+
+		for (SyncFile syncFile : syncFiles) {
+			String syncFileFilePathName = syncFile.getFilePathName();
+
+			syncFileFilePathName = syncFileFilePathName.replace(
+				sourceFilePathName, targetFilePathName);
+
+			syncFile.setFilePathName(syncFileFilePathName);
+
+			SyncFileService.update(syncFile);
+		}
+
+		// Sync sites
+
+		List<SyncSite> syncSites = SyncSiteService.findSyncSites(syncAccountId);
+
+		for (SyncSite syncSite : syncSites) {
+			String syncSiteFilePathName = syncSite.getFilePathName();
+
+			syncSiteFilePathName = syncSiteFilePathName.replace(
+				sourceFilePathName, targetFilePathName);
+
+			syncSite.setFilePathName(syncSiteFilePathName);
+
+			SyncSiteService.update(syncSite);
+		}
+	}
+
+	public static SyncAccount synchronizeSyncAccount(long syncAccountId) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+
+		parameters.put("uuid", null);
+
+		GetSyncContextEvent getSyncContextEvent = new GetSyncContextEvent(
+			syncAccountId, parameters);
+
+		getSyncContextEvent.run();
+
+		return SyncAccountService.fetchSyncAccount(syncAccountId);
 	}
 
 	public static void unregisterModelListener(

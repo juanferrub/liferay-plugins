@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,19 +19,16 @@ import com.liferay.sync.engine.model.SyncSite;
 import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.service.SyncSiteService;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Shinn Lok
  */
-@RunWith(PowerMockRunner.class)
 public class GetUserSitesGroupsEventTest extends BaseTestCase {
 
 	@After
@@ -48,10 +45,12 @@ public class GetUserSitesGroupsEventTest extends BaseTestCase {
 
 	@Test
 	public void testRun() throws Exception {
-		setPostResponse("dependencies/get_user_sites_groups.json");
+		setResponse("dependencies/get_user_sites_groups.json");
 
 		GetUserSitesGroupsEvent getUserSitesGroupsEvent =
-			new GetUserSitesGroupsEvent(syncAccount.getSyncAccountId(), null);
+			new GetUserSitesGroupsEvent(
+				syncAccount.getSyncAccountId(),
+				Collections.<String, Object>emptyMap());
 
 		getUserSitesGroupsEvent.run();
 
