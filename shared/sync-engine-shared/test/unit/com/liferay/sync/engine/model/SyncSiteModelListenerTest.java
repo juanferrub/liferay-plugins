@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,8 @@ package com.liferay.sync.engine.model;
 
 import com.liferay.sync.engine.BaseTestCase;
 import com.liferay.sync.engine.service.SyncSiteService;
+import com.liferay.sync.engine.util.FileUtil;
+import com.liferay.sync.engine.util.SyncSiteTestUtil;
 
 import java.util.Set;
 
@@ -38,8 +40,8 @@ public class SyncSiteModelListenerTest extends BaseTestCase {
 
 		SyncSiteService.registerModelListener(_syncSiteModelListener);
 
-		_syncSite = SyncSiteService.addSyncSite(
-			10158, filePathName + "/test-site", 10185,
+		_syncSite = SyncSiteTestUtil.addSyncSite(
+			10158, FileUtil.getFilePathName(filePathName, "test-site"), 10185,
 			syncAccount.getSyncAccountId());
 
 		_syncSite.setActive(true);
@@ -50,9 +52,6 @@ public class SyncSiteModelListenerTest extends BaseTestCase {
 	@After
 	@Override
 	public void tearDown() throws Exception {
-		SyncSiteService.setActiveSyncSiteIds(
-			syncAccount.getSyncAccountId(), null);
-
 		SyncSiteService.unregisterModelListener(_syncSiteModelListener);
 
 		SyncSiteService.deleteSyncSite(_syncSite.getSyncSiteId());

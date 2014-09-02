@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,12 +25,42 @@ import com.liferay.sync.engine.service.persistence.BasePersistenceImpl;
  * @author Shinn Lok
  */
 @DatabaseTable(daoClass = BasePersistenceImpl.class, tableName = "SyncSite")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true, value = "active")
 public class SyncSite extends StateAwareModel {
 
 	public static final int STATE_CONNECTED = 1;
 
 	public static final int STATE_DISCONNECTED = 0;
+
+	public static final int TYPE_OPEN = 1;
+
+	public static final int TYPE_PRIVATE = 3;
+
+	public static final int TYPE_RESTRICTED = 2;
+
+	public static final int TYPE_SYSTEM = 4;
+
+	public static final int UI_EVENT_SYNC_SITE_FOLDER_MISSING = 1;
+
+	@Override
+	public boolean equals(Object object) {
+		if (object == this) {
+			return true;
+		}
+
+		if (!(object instanceof SyncSite)) {
+			return false;
+		}
+
+		SyncSite syncSite = (SyncSite)object;
+
+		if (syncSite.getSyncSiteId() == syncSiteId) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	public boolean getActive() {
 		return active;
@@ -56,12 +86,20 @@ public class SyncSite extends StateAwareModel {
 		return groupId;
 	}
 
-	public long getLastRemoteSyncTime() {
-		return lastRemoteSyncTime;
+	public String getName() {
+		if ((type == 0) && !site) {
+			return friendlyURL.substring(1);
+		}
+
+		return name.replace(" LFR_ORGANIZATION", " (Org)");
 	}
 
-	public String getName() {
-		return name;
+	public long getParentGroupId() {
+		return parentGroupId;
+	}
+
+	public long getRemoteSyncTime() {
+		return remoteSyncTime;
 	}
 
 	public boolean getSite() {
@@ -82,6 +120,11 @@ public class SyncSite extends StateAwareModel {
 
 	public String getTypeSettings() {
 		return typeSettings;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int)(syncSiteId ^ (syncSiteId >>> 32));
 	}
 
 	public boolean isActive() {
@@ -116,12 +159,16 @@ public class SyncSite extends StateAwareModel {
 		this.groupId = groupId;
 	}
 
-	public void setLastRemoteSyncTime(long lastRemoteSyncTime) {
-		this.lastRemoteSyncTime = lastRemoteSyncTime;
-	}
-
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setParentGroupId(long parentGroupId) {
+		this.parentGroupId = parentGroupId;
+	}
+
+	public void setRemoteSyncTime(long remoteSyncTime) {
+		this.remoteSyncTime = remoteSyncTime;
 	}
 
 	public void setSite(boolean site) {
@@ -163,10 +210,13 @@ public class SyncSite extends StateAwareModel {
 	protected long groupId;
 
 	@DatabaseField(useGetSet = true)
-	protected long lastRemoteSyncTime;
+	protected String name;
 
 	@DatabaseField(useGetSet = true)
-	protected String name;
+	protected long parentGroupId;
+
+	@DatabaseField(useGetSet = true)
+	protected long remoteSyncTime;
 
 	@DatabaseField(useGetSet = true)
 	protected boolean site;

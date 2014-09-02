@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This file is part of Liferay Social Office. Liferay Social Office is free
  * software: you can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
 <%@ page import="com.liferay.portal.kernel.bean.BeanParamUtil" %><%@
-page import="com.liferay.portal.kernel.dao.search.ResultRow" %><%@
 page import="com.liferay.portal.kernel.dao.search.SearchContainer" %><%@
 page import="com.liferay.portal.kernel.dao.search.SearchPaginationUtil" %><%@
 page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
@@ -66,7 +65,8 @@ page import="com.liferay.portlet.announcements.model.AnnouncementsFlagConstants"
 page import="com.liferay.portlet.announcements.service.AnnouncementsEntryLocalServiceUtil" %><%@
 page import="com.liferay.portlet.announcements.service.AnnouncementsFlagLocalServiceUtil" %><%@
 page import="com.liferay.portlet.announcements.util.AnnouncementsUtil" %><%@
-page import="com.liferay.so.announcements.util.SOAnnouncementsUtil" %>
+page import="com.liferay.so.announcements.util.SOAnnouncementsUtil" %><%@
+page import="com.liferay.taglib.search.ResultRow" %>
 
 <%@ page import="java.text.Format" %>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,18 +19,20 @@ import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBArticleConstants;
 import com.liferay.knowledgebase.service.KBArticleLocalServiceUtil;
 import com.liferay.knowledgebase.service.persistence.KBArticleUtil;
+import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.knowledgebase.util.PortletKeys;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
@@ -54,15 +56,37 @@ public class KBArticleStagedModelDataHandler
 	@Override
 	public void deleteStagedModel(
 			String uuid, long groupId, String className, String extraData)
-		throws PortalException, SystemException {
+		throws PortalException {
 
-		KBArticle kbArticle =
-			KBArticleLocalServiceUtil.fetchKBArticleByUuidAndGroupId(
-				uuid, groupId);
+		KBArticle kbArticle = fetchStagedModelByUuidAndGroupId(uuid, groupId);
 
 		if (kbArticle != null) {
 			KBArticleLocalServiceUtil.deleteKBArticle(kbArticle);
 		}
+	}
+
+	@Override
+	public KBArticle fetchStagedModelByUuidAndCompanyId(
+		String uuid, long companyId) {
+
+		List<KBArticle> kbArticles =
+			KBArticleLocalServiceUtil.getKBArticlesByUuidAndCompanyId(
+				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new StagedModelModifiedDateComparator<KBArticle>());
+
+		if (ListUtil.isEmpty(kbArticles)) {
+			return null;
+		}
+
+		return kbArticles.get(0);
+	}
+
+	@Override
+	public KBArticle fetchStagedModelByUuidAndGroupId(
+		String uuid, long groupId) {
+
+		return KBArticleLocalServiceUtil.fetchKBArticleByUuidAndGroupId(
+			uuid, groupId);
 	}
 
 	@Override
@@ -148,7 +172,7 @@ public class KBArticleStagedModelDataHandler
 				resourcePrimaryKey, kbArticle.getVersion());
 
 			if (existingKBArticle == null) {
-				existingKBArticle = KBArticleUtil.fetchByUUID_G(
+				existingKBArticle = fetchStagedModelByUuidAndGroupId(
 					kbArticle.getUuid(), portletDataContext.getScopeGroupId());
 			}
 
@@ -162,8 +186,9 @@ public class KBArticleStagedModelDataHandler
 				if (existingKBArticle == null) {
 					importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
 						userId, parentResourcePrimKey, kbArticle.getTitle(),
-						kbArticle.getContent(), kbArticle.getDescription(),
-						sections, StringPool.BLANK, serviceContext);
+						kbArticle.getUrlTitle(), kbArticle.getContent(),
+						kbArticle.getDescription(), sections, null,
+						serviceContext);
 
 					KBArticleLocalServiceUtil.updatePriority(
 						importedKBArticle.getResourcePrimKey(),
@@ -173,7 +198,7 @@ public class KBArticleStagedModelDataHandler
 					KBArticleLocalServiceUtil.updateKBArticle(
 						userId, existingKBArticle.getResourcePrimKey(),
 						kbArticle.getTitle(), kbArticle.getContent(),
-						kbArticle.getDescription(), sections, StringPool.BLANK,
+						kbArticle.getDescription(), sections, null, null,
 						serviceContext);
 
 					KBArticleLocalServiceUtil.moveKBArticle(
@@ -193,8 +218,8 @@ public class KBArticleStagedModelDataHandler
 		else {
 			importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
 				userId, parentResourcePrimKey, kbArticle.getTitle(),
-				kbArticle.getContent(), kbArticle.getDescription(), sections,
-				StringPool.BLANK, serviceContext);
+				kbArticle.getUrlTitle(), kbArticle.getContent(),
+				kbArticle.getDescription(), sections, null, serviceContext);
 
 			KBArticleLocalServiceUtil.updatePriority(
 				importedKBArticle.getResourcePrimKey(),
@@ -257,14 +282,16 @@ public class KBArticleStagedModelDataHandler
 
 		for (Element dlFileEntryElement : dlFileEntryElements) {
 			try {
-				inputStream = portletDataContext.getZipEntryAsInputStream(
+				byte[] bytes = portletDataContext.getZipEntryAsByteArray(
 					dlFileEntryElement.attributeValue("path"));
+
+				inputStream = new UnsyncByteArrayInputStream(bytes);
 
 				String fileName = dlFileEntryElement.attributeValue(
 					"file-name");
 
-				String mimeType = MimeTypesUtil.getContentType(
-					inputStream, fileName);
+				String mimeType = KnowledgeBaseUtil.getMimeType(
+					bytes, fileName);
 
 				PortletFileRepositoryUtil.addPortletFileEntry(
 					portletDataContext.getScopeGroupId(),

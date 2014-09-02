@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,6 @@
 package com.liferay.resourcesimporter.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -120,7 +119,7 @@ public class FileSystemImporter extends BaseImporter {
 
 	protected void addApplicationDisplayTemplate(
 			String script, File file, long classNameId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		String fileName = FileUtil.stripExtension(file.getName());
 
@@ -649,7 +648,7 @@ public class FileSystemImporter extends BaseImporter {
 
 		String content = StringUtil.read(inputStream);
 
-		content = processJournalArticleContent(content);
+		content = replaceFileEntryURL(content);
 
 		Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
 			LocalizationUtil.getDefaultLanguageId(content));
@@ -1124,34 +1123,6 @@ public class FileSystemImporter extends BaseImporter {
 		return filesList.toArray(new File[filesList.size()]);
 	}
 
-	protected String processJournalArticleContent(String content)
-		throws Exception {
-
-		content = replaceFileEntryURL(content);
-
-		if (content.contains("<?xml version=\"1.0\"")) {
-			return content;
-		}
-
-		StringBundler sb = new StringBundler(13);
-
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<root available-locales=\"");
-		sb.append(LocaleUtil.getDefault());
-		sb.append("\" default-locale=\"");
-		sb.append(LocaleUtil.getDefault());
-		sb.append("\">");
-		sb.append("<static-content language-id=\"");
-		sb.append(LocaleUtil.getDefault());
-		sb.append("\">");
-		sb.append("<![CDATA[");
-		sb.append(content);
-		sb.append("]]>");
-		sb.append("</static-content></root>");
-
-		return sb.toString();
-	}
-
 	protected String replaceFileEntryURL(String content) throws Exception {
 		Matcher matcher = _fileEntryPattern.matcher(content);
 
@@ -1237,9 +1208,6 @@ public class FileSystemImporter extends BaseImporter {
 		addDDMStructures(StringPool.BLANK, _JOURNAL_DDM_STRUCTURES_DIR_NAME);
 
 		addDDMTemplates(StringPool.BLANK, _JOURNAL_DDM_TEMPLATES_DIR_NAME);
-
-		addJournalArticles(
-			StringPool.BLANK, StringPool.BLANK, _JOURNAL_ARTICLES_DIR_NAME);
 
 		addLayoutTemplate(_LAYOUT_TEMPLATE_DIR_NAME);
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,6 +19,8 @@ import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
 import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncSiteService;
+import com.liferay.sync.engine.util.FileUtil;
+import com.liferay.sync.engine.util.SyncSiteTestUtil;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,14 +34,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Shinn Lok
  */
-@RunWith(PowerMockRunner.class)
 public class GetAllSyncDLObjectsEventTest extends BaseTestCase {
 
 	@Before
@@ -47,8 +45,8 @@ public class GetAllSyncDLObjectsEventTest extends BaseTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		_syncSite = SyncSiteService.addSyncSite(
-			10158, filePathName + "/test-site", 10185,
+		_syncSite = SyncSiteTestUtil.addSyncSite(
+			10158, FileUtil.getFilePathName(filePathName, "test-site"), 10185,
 			syncAccount.getSyncAccountId());
 	}
 
@@ -66,26 +64,28 @@ public class GetAllSyncDLObjectsEventTest extends BaseTestCase {
 
 	@Test
 	public void testRun() throws Exception {
-		setGetResponse("dependencies/get_all_sync_dl_objects.json");
-		setPostResponse("dependencies/get_all_sync_dl_objects.json");
+		setResponse("dependencies/get_all_sync_dl_objects.json");
 
 		Map<String, Object> parameters = new HashMap<String, Object>();
 
-		parameters.put("folderId", 0);
+		parameters.put("companyId", _syncSite.getCompanyId());
+		parameters.put("lastAccessTime", 0);
 		parameters.put("repositoryId", _syncSite.getGroupId());
+		parameters.put("syncSite", _syncSite);
 
-		GetAllSyncDLObjectsEvent getAllSyncDLObjectsEvent =
-			new GetAllSyncDLObjectsEvent(
+		GetSyncDLObjectUpdateEvent getSyncDLObjectUpdateEvent =
+			new GetSyncDLObjectUpdateEvent(
 				syncAccount.getSyncAccountId(), parameters);
 
-		getAllSyncDLObjectsEvent.run();
+		getSyncDLObjectUpdateEvent.run();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());
 
 		Assert.assertEquals(3, _syncFiles.size());
 
-		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
+		Path filePath = Paths.get(
+			FileUtil.getFilePathName(_syncSite.getFilePathName(), "test.txt"));
 
 		Assert.assertTrue(Files.exists(filePath));
 	}

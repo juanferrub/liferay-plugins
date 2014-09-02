@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,7 @@ package com.liferay.sync.engine.model;
 
 import com.liferay.sync.engine.BaseTestCase;
 import com.liferay.sync.engine.service.SyncFileService;
+import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.SyncFileTestUtil;
 
 import java.util.HashMap;
@@ -34,17 +35,20 @@ public class ModelListenerTest extends BaseTestCase {
 		SyncFileService.registerModelListener(new SyncFileModelListener());
 
 		SyncFile syncFile = SyncFileTestUtil.addFileSyncFile(
-			"/home/liferay/test", 0, syncAccount.getSyncAccountId());
+			FileUtil.getFilePathName(filePathName, "test"), 0,
+			syncAccount.getSyncAccountId());
 
 		Assert.assertTrue(_onCreateCalled);
 
-		syncFile.setFilePathName("/home/liferay/test2");
+		syncFile.setFilePathName(
+			FileUtil.getFilePathName(filePathName, "test2"));
 		syncFile.setSize(256);
 
 		SyncFileService.update(syncFile);
 
 		Assert.assertEquals(
-			"/home/liferay/test", _originalFieldValues.get("filePathName"));
+			FileUtil.getFilePathName(filePathName, "test"),
+			_originalFieldValues.get("filePathName"));
 		Assert.assertEquals(3, _originalFieldValues.size());
 
 		SyncFileService.deleteSyncFile(syncFile);
@@ -57,7 +61,8 @@ public class ModelListenerTest extends BaseTestCase {
 		SyncFileService.registerModelListener(new SyncFileModelListener());
 
 		SyncFile syncFile = SyncFileTestUtil.addFileSyncFile(
-			"/home/liferay/test", 0, syncAccount.getSyncAccountId());
+			FileUtil.getFilePathName(filePathName, "test"), 0,
+			syncAccount.getSyncAccountId());
 
 		syncFile.setSyncFileId(12345);
 

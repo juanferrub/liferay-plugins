@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,14 +14,11 @@
 
 package com.liferay.sync.engine.service;
 
+import com.liferay.sync.engine.documentlibrary.event.GetUserSitesGroupsEvent;
 import com.liferay.sync.engine.model.ModelListener;
-import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
+import com.liferay.sync.engine.model.SyncSiteModelListener;
 import com.liferay.sync.engine.service.persistence.SyncSitePersistence;
-import com.liferay.sync.engine.util.FileUtil;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import java.sql.SQLException;
 
@@ -40,30 +37,16 @@ import org.slf4j.LoggerFactory;
  */
 public class SyncSiteService {
 
-	public static SyncSite addSyncSite(
-			long companyId, String filePathName, long groupId,
-			long syncAccountId)
-		throws Exception {
+	public static SyncSite activateSyncSite(long syncAccountId, boolean reset) {
+		SyncSite syncSite = fetchSyncSite(syncAccountId);
 
-		// Sync site
+		syncSite.setActive(true);
 
-		SyncSite syncSite = new SyncSite();
+		if (reset) {
+			syncSite.setRemoteSyncTime(0);
+		}
 
-		syncSite.setCompanyId(companyId);
-		syncSite.setFilePathName(filePathName);
-		syncSite.setGroupId(groupId);
-		syncSite.setSyncAccountId(syncAccountId);
-
-		_syncSitePersistence.create(syncSite);
-
-		// Sync file
-
-		Files.createDirectories(Paths.get(filePathName));
-
-		SyncFileService.addSyncFile(
-			null, null, filePathName, FileUtil.getFileKey(filePathName),
-			filePathName, null, filePathName, 0, groupId,
-			syncSite.getSyncAccountId(), SyncFile.TYPE_FOLDER);
+		update(syncSite);
 
 		return syncSite;
 	}
@@ -171,6 +154,8 @@ public class SyncSiteService {
 			}
 		}
 
+		_syncSitePersistence.registerModelListener(new SyncSiteModelListener());
+
 		return _syncSitePersistence;
 	}
 
@@ -180,10 +165,12 @@ public class SyncSiteService {
 		_syncSitePersistence.registerModelListener(modelListener);
 	}
 
-	public static void setActiveSyncSiteIds(
-		long syncAccountId, Set<Long> activeSyncSiteIds) {
+	public static void synchronizeSyncSites(long syncAccountId) {
+		GetUserSitesGroupsEvent getUserSitesGroupsEvent =
+			new GetUserSitesGroupsEvent(
+				syncAccountId, Collections.<String, Object>emptyMap());
 
-		_activeSyncSiteIds.put(syncAccountId, activeSyncSiteIds);
+		getUserSitesGroupsEvent.run();
 	}
 
 	public static void unregisterModelListener(
